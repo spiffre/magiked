@@ -1,0 +1,21 @@
+{
+	"importMap": "import_map.json",
+	
+	"lint":
+	{
+		"files":
+		{
+			"include":
+			[
+				"sources/",
+				"dependencies/"
+			]
+		},
+		
+		"rules":
+		{
+			"tags": [ "recommended" ],
+			"exclude": [ "ban-unused-ignore" ]
+		}
+	}
+}

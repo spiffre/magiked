@@ -1,0 +1,8 @@
+{
+  "name": "repo-crawler",
+  "version": "1.0.0",
+  "scripts": {
+    "tc": "deno check ./sources/main.ts",
+    "test": "deno run --allow-all ./sources/main.ts"
+  }
+}
