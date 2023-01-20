@@ -119,3 +119,33 @@ Deno.test("base-test, with sorting, on leave", async () =>
 	// Compare with the expectation that the order is correct
 	assertEquals(output, expected)
 });
+
+Deno.test("helper, isInsideDirectory", async () =>
+{
+	const dir = path.resolve(DATA_BASE_PATH, "base-test")
+	const output: { name: string, isInsideModuleA : boolean }[] = []
+	
+	const walker = new Walker()
+	await walker.init(dir,
+	{
+		
+		sort : true,
+		
+		onFileNodeEnter (node)
+		{
+			const isInsideModuleA = walker.isInsideDirectory(node, [ 'ModuleA' ])
+			output.push({ name : node.name, isInsideModuleA })
+		}
+	})
+
+	const expected =
+	[
+		{ name : "file1.js", isInsideModuleA : true },
+		{ name : "file2.js", isInsideModuleA : true },
+		{ name : "file3.js", isInsideModuleA : false },
+		{ name : "file4.js", isInsideModuleA : false },
+	]
+	
+	// Compare with the expectation that the order is correct
+	assertEquals(output, expected)
+});
