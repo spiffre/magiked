@@ -42,3 +42,80 @@ Deno.test("base-test, no sorting", async () =>
 	assertArrayIncludes(output, expected)
 	assertEquals(output.length, expected.length)
 });
+
+
+Deno.test("base-test, with sorting, on enter", async () =>
+{
+	const dir = path.resolve(DATA_BASE_PATH, "base-test")
+	const output: string[] = []
+	
+	const walker = new Walker()
+	await walker.init(dir,
+	{
+		sort : true,
+		
+		onDirectoryNodeEnter (node)
+		{
+			const filepath = walker.nodeToPathAsString(node, { absolute : false })
+			output.push(filepath)
+		},
+		
+		onFileNodeEnter (node)
+		{
+			const filepath = walker.nodeToPathAsString(node, { absolute : false })
+			output.push(filepath)
+		}
+	})
+
+	const expected =
+	[
+		"",  // The walker's root directory
+		"ModuleA",
+		"ModuleA/file1.js",
+		"ModuleA/file2.js",
+		"ModuleB",
+		"ModuleB/file3.js",
+		"ModuleB/file4.js",
+	]
+	
+	// Compare with the expectation that the order is correct
+	assertEquals(output, expected)
+});
+
+Deno.test("base-test, with sorting, on leave", async () =>
+{
+	const dir = path.resolve(DATA_BASE_PATH, "base-test")
+	const output: string[] = []
+	
+	const walker = new Walker()
+	await walker.init(dir,
+	{
+		sort : true,
+		
+		onDirectoryNodeLeave (node)
+		{
+			const filepath = walker.nodeToPathAsString(node, { absolute : false })
+			output.push(filepath)
+		},
+		
+		onFileNodeLeave (node)
+		{
+			const filepath = walker.nodeToPathAsString(node, { absolute : false })
+			output.push(filepath)
+		}
+	})
+
+	const expected =
+	[
+		"ModuleA/file1.js",
+		"ModuleA/file2.js",
+		"ModuleA",
+		"ModuleB/file3.js",
+		"ModuleB/file4.js",
+		"ModuleB",
+		"",  // The walker's root directory
+	]
+	
+	// Compare with the expectation that the order is correct
+	assertEquals(output, expected)
+});
