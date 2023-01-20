@@ -327,6 +327,14 @@ export class Walker
 			node = node.parent
 		}
 		
+		// If the buffer is empty, we're looking at the root directory
+		//if (buffer == '')
+		//{
+		//	// We return ./ instead of an empty string
+		//	buffer = './'
+		//}
+		
+		// Be aware that buffer can be an empty string (for the root directory)
 		return options.absolute
 				? path.join(this.rootPathAsString, buffer)
 				: buffer
