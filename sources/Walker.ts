@@ -31,6 +31,7 @@ const ESPREE_PARSE_OPTIONS: EspreeParseOptions =
 
 type WalkerOptions = WalkerTraversalOptions &
 {
+	sort?: boolean
 	filter?: (name: string, fullpath: string) => boolean
 }
 
@@ -102,8 +103,24 @@ export class Walker
 		// Call the onDirectoryNodeEnter callback, if provided
 		this.options.onDirectoryNodeEnter?.(dirNode)
 		
+		// Read the directory's content
+		const entries: Deno.DirEntry[] = []
+		for await (const fileOrDirectory of await readDirAsync(dirpath))
+		{
+			entries.push(fileOrDirectory)
+		}
+		
+		// Sort if needed
+		if (this.options.sort == true)
+		{
+			entries.sort( (a: Deno.DirEntry, b: Deno.DirEntry) =>
+			{
+				return a.name.localeCompare(b.name)
+			})
+		}
+		
 		// Iterate on all sub-directories and files
-		for await (const fileOrDirectory of readDirAsync(dirpath))
+		for (const fileOrDirectory of entries)
 		{
 			if (fileOrDirectory.name == ".DS_Store")
 			{
