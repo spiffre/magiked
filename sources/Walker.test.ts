@@ -7,9 +7,9 @@ import type { DirectoryNode, FileNode, JsonPayload, TextPayload } from "./Walker
 const DATA_BASE_PATH = "tests/data"
 
 
-Deno.test("base-test, no sorting", async () =>
+Deno.test("basic test, no sorting", async () =>
 {
-	const dir = path.resolve(DATA_BASE_PATH, "base-test")
+	const dir = path.resolve(DATA_BASE_PATH, "basic-test")
 	const output: string[] = []
 	
 	const walker = new Walker()
@@ -44,9 +44,9 @@ Deno.test("base-test, no sorting", async () =>
 	assertEquals(output.length, expected.length)
 });
 
-Deno.test("base-test, pathToNode/pathAsStringToNode, directory", async () =>
+Deno.test("basic test, pathToNode/pathAsStringToNode, directory", async () =>
 {
-	const dir = path.resolve(DATA_BASE_PATH, "base-test")
+	const dir = path.resolve(DATA_BASE_PATH, "basic-test")
 	
 	const walker = new Walker()
 	await walker.init(dir)
@@ -61,9 +61,9 @@ Deno.test("base-test, pathToNode/pathAsStringToNode, directory", async () =>
 	assertEquals(node?.name, "ModuleA")
 });
 
-Deno.test("base-test, pathToNode/pathAsStringToNode, file", async () =>
+Deno.test("basic test, pathToNode/pathAsStringToNode, file", async () =>
 {
-	const dir = path.resolve(DATA_BASE_PATH, "base-test")
+	const dir = path.resolve(DATA_BASE_PATH, "basic-test")
 	
 	const walker = new Walker()
 	await walker.init(dir)
@@ -78,9 +78,9 @@ Deno.test("base-test, pathToNode/pathAsStringToNode, file", async () =>
 	assertEquals(node?.name, "file1.js")
 });
 
-Deno.test("base-test, pathToNode/pathAsStringToNode, not found", async () =>
+Deno.test("basic test, pathToNode/pathAsStringToNode, not found", async () =>
 {
-	const dir = path.resolve(DATA_BASE_PATH, "base-test")
+	const dir = path.resolve(DATA_BASE_PATH, "basic-test")
 	
 	const walker = new Walker()
 	await walker.init(dir)
@@ -92,9 +92,9 @@ Deno.test("base-test, pathToNode/pathAsStringToNode, not found", async () =>
 	assertStrictEquals(node, node2)
 });
 
-Deno.test("base-test, nodeToPath/nodeToPathAsString, directory", async () =>
+Deno.test("basic test, nodeToPath/nodeToPathAsString, directory", async () =>
 {
-	const dir = path.resolve(DATA_BASE_PATH, "base-test")
+	const dir = path.resolve(DATA_BASE_PATH, "basic-test")
 	const nodes: DirectoryNode[] = []
 	
 	const walker = new Walker()
@@ -116,9 +116,9 @@ Deno.test("base-test, nodeToPath/nodeToPathAsString, directory", async () =>
 	assertEquals(directoryPathAsParts, [ "ModuleA" ])
 });
 
-Deno.test("base-test, nodeToPath/nodeToPathAsString, file", async () =>
+Deno.test("basic test, nodeToPath/nodeToPathAsString, file", async () =>
 {
-	const dir = path.resolve(DATA_BASE_PATH, "base-test")
+	const dir = path.resolve(DATA_BASE_PATH, "basic-test")
 	const nodes: FileNode[] = []
 	
 	const walker = new Walker()
@@ -140,9 +140,9 @@ Deno.test("base-test, nodeToPath/nodeToPathAsString, file", async () =>
 	assertEquals(filePathAsParts, [ "ModuleA", "file1.js" ])
 });
 
-Deno.test("base-test, with sorting, on enter", async () =>
+Deno.test("basic test, with sorting, on enter", async () =>
 {
-	const dir = path.resolve(DATA_BASE_PATH, "base-test")
+	const dir = path.resolve(DATA_BASE_PATH, "basic-test")
 	const output: string[] = []
 	
 	const walker = new Walker()
@@ -178,9 +178,9 @@ Deno.test("base-test, with sorting, on enter", async () =>
 	assertEquals(output, expected)
 });
 
-Deno.test("base-test, with sorting, on leave", async () =>
+Deno.test("basic test, with sorting, on leave", async () =>
 {
-	const dir = path.resolve(DATA_BASE_PATH, "base-test")
+	const dir = path.resolve(DATA_BASE_PATH, "basic-test")
 	const output: string[] = []
 	
 	const walker = new Walker()
@@ -218,7 +218,7 @@ Deno.test("base-test, with sorting, on leave", async () =>
 
 Deno.test("helper, isInsideDirectory", async () =>
 {
-	const dir = path.resolve(DATA_BASE_PATH, "base-test")
+	const dir = path.resolve(DATA_BASE_PATH, "basic-test")
 	const output: { name: string, isInsideModuleA : boolean }[] = []
 	
 	const walker = new Walker()
@@ -246,6 +246,43 @@ Deno.test("helper, isInsideDirectory", async () =>
 	assertEquals(output, expected)
 });
 
+Deno.test("loaders, no loaders", async () =>
+{
+	const dir = path.resolve(DATA_BASE_PATH, "default-loaders")
+
+	const walker = new Walker<JsonPayload|TextPayload>()
+	await walker.init(dir,
+	{
+		handlers : { /* No loaders specified */ }
+	})
+
+	{
+		const config = walker.pathAsStringToNode("support/config.json")
+		
+		// Ensure we have a valid JsonPayload
+		assert(config !== undefined)
+		assert(config.kind == "FILE")
+		assert(config.payload === null)
+	}
+	
+	{
+		const readme = walker.pathAsStringToNode("support/README.txt")
+		
+		// Ensure we have a valid TextPayload
+		assert(readme !== undefined)
+		assert(readme.kind == "FILE")
+		assert(readme.payload === null)
+	}
+	
+	{
+		const todo = walker.pathAsStringToNode("support/TODO")
+		
+		// Ensure we have a valid TextPayload
+		assert(todo !== undefined)
+		assert(todo.kind == "FILE")
+		assert(todo.payload === null)
+	}
+});
 
 Deno.test("loaders, default loaders", async () =>
 {
@@ -264,7 +301,7 @@ Deno.test("loaders, default loaders", async () =>
 	})
 
 	{
-		const config = walker.pathAsStringToNode("samples/config.json")
+		const config = walker.pathAsStringToNode("support/config.json")
 		
 		// Ensure we have a valid JsonPayload
 		assert(config !== undefined)
@@ -281,7 +318,7 @@ Deno.test("loaders, default loaders", async () =>
 	}
 	
 	{
-		const readme = walker.pathAsStringToNode("samples/README.txt")
+		const readme = walker.pathAsStringToNode("support/README.txt")
 		
 		// Ensure we have a valid TextPayload
 		assert(readme !== undefined)
@@ -297,7 +334,7 @@ Deno.test("loaders, default loaders", async () =>
 	}
 	
 	{
-		const todo = walker.pathAsStringToNode("samples/TODO")
+		const todo = walker.pathAsStringToNode("support/TODO")
 		
 		// Ensure we have a valid TextPayload
 		assert(todo !== undefined)
