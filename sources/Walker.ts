@@ -37,7 +37,7 @@ type HandlerMapping<T extends Payload> =
 	[U in T as T['extension']]?: Handler<T>
 };
 
-type WalkerOptions<T extends Payload> = WalkerTraversalOptions &
+type WalkerOptions<T extends Payload> = WalkerTraversalOptions<T> &
 {
 	sort?: boolean
 	filter?: (name: string, fullpath: string) => boolean
@@ -45,13 +45,13 @@ type WalkerOptions<T extends Payload> = WalkerTraversalOptions &
 	handlers?: HandlerMapping<T>
 }
 
-interface WalkerTraversalOptions
+interface WalkerTraversalOptions<T extends Payload>
 {
-	onFileNodeEnter?: (node: FileNode) => void
-	onDirectoryNodeEnter?: (node: DirectoryNode) => void
+	onFileNodeEnter?: (node: FileNode<T>) => void
+	onDirectoryNodeEnter?: (node: DirectoryNode<T>) => void
 
-	onFileNodeLeave?: (node: FileNode) => void
-	onDirectoryNodeLeave?: (node: DirectoryNode) => void
+	onFileNodeLeave?: (node: FileNode<T>) => void
+	onDirectoryNodeLeave?: (node: DirectoryNode<T>) => void
 }
 
 export type { FileNode, DirectoryNode, Payload }
@@ -59,7 +59,7 @@ export type { FileNode, DirectoryNode, Payload }
 
 export class Walker<T extends Payload>
 {
-	root: DirectoryNode|null
+	root: DirectoryNode<T>|null
 	rootPath: string[]
 	rootPathAsString: string
 	
@@ -109,13 +109,13 @@ export class Walker<T extends Payload>
 		this.root = await this.readDir(name, directory)
 	}
 	
-	async readDir (name: string, dirpath: string, parent: DirectoryNode|null = null): Promise<DirectoryNode>
+	async readDir (name: string, dirpath: string, parent: DirectoryNode<T>|null = null): Promise<DirectoryNode<T>>
 	{
-		const directories: Record<string, DirectoryNode> = {}
-		const files: Record<string, FileNode> = {}
+		const directories: Record<string, DirectoryNode<T>> = {}
+		const files: Record<string, FileNode<T>> = {}
 		
 		// Create a placeholder entry object
-		const dirNode: DirectoryNode =
+		const dirNode: DirectoryNode<T> =
 		{
 			kind : NodeKind.DIRECTORY,
 			uid : this.currentFileId++,
@@ -166,10 +166,10 @@ export class Walker<T extends Payload>
 				
 				if (include)
 				{
-					// Create a DirectoryNode
+					// Create a DirectoryNode<T>
 					const subdirNode = await this.readDir(fileOrDirectory.name, entryFullpath, dirNode)
 					
-					// Attach it to its parent DirectoryNode
+					// Attach it to its parent DirectoryNode<T>
 					dirNode.directories[fileOrDirectory.name] = subdirNode
 					
 					// Make sure the count is right
@@ -184,10 +184,10 @@ export class Walker<T extends Payload>
 				
 				if (include)
 				{
-					// Create a FileNode
+					// Create a FileNode<T>
 					const fileNode = await this.readFile(fileOrDirectory.name, entryFullpath, dirNode)
 					
-					// Attach it to its parent DirectoryNode
+					// Attach it to its parent DirectoryNode<T>
 					dirNode.files[fileOrDirectory.name] = fileNode
 					
 					// Make sure the count is right
@@ -206,9 +206,9 @@ export class Walker<T extends Payload>
 		return dirNode
 	}
 	
-	async readFile (name: string, filepath: string, parent: DirectoryNode): Promise<FileNode>
+	async readFile (name: string, filepath: string, parent: DirectoryNode<T>): Promise<FileNode<T>>
 	{
-		const fileNode: FileNode =
+		const fileNode: FileNode<T> =
 		{
 			kind : NodeKind.FILE,
 			uid : this.currentFileId++,
@@ -220,7 +220,7 @@ export class Walker<T extends Payload>
 		// Call the onFileNodeEnter callback, if provided
 		this.options.onFileNodeEnter?.(fileNode)
 
-		// If a handker is provided, use it to load the file's content and process it
+		// If a handler is provided, use it to load the file's content and process it
 		const extension = path.extname(name)
 		const handler = this.handlers.get(extension)
 		if (handler)
@@ -236,9 +236,9 @@ export class Walker<T extends Payload>
 	
 	// NAVIGATION
 	
-	async traverse (options: WalkerTraversalOptions)
+	async traverse (options: WalkerTraversalOptions<T>)
 	{
-		async function traverse (directory: DirectoryNode)
+		async function traverse (directory: DirectoryNode<T>)
 		{
 			// Pre callback for files
 			if (typeof options.onFileNodeEnter == 'function')
@@ -312,7 +312,7 @@ export class Walker<T extends Payload>
 	
 	// PATH/NODE and NODE/PATH CONVERSION
 	
-	nodeToPath (startNode: FileNode | DirectoryNode, options = { absolute : false }): string[]
+	nodeToPath (startNode: FileNode<T> | DirectoryNode<T>, options = { absolute : false }): string[]
 	{
 		let node = startNode
 		const buffer = []
@@ -328,7 +328,7 @@ export class Walker<T extends Payload>
 				: buffer
 	}
 	
-	pathToNode (filepath: string[]): FileNode | DirectoryNode | undefined
+	pathToNode (filepath: string[]): FileNode<T> | DirectoryNode<T> | undefined
 	{
 		if (this.root == null)
 		{
@@ -336,10 +336,10 @@ export class Walker<T extends Payload>
 		}
 		
 		// Actually we should check here if filepath[last] has an extension or not
-		// Whether it has or not determines if we go to the last part with a DirectoryNode
-		// Or if we have to stop one before and switch to a FileNode
+		// Whether it has or not determines if we go to the last part with a DirectoryNode<T>
+		// Or if we have to stop one before and switch to a FileNode<T>
 		
-		let dirNode: DirectoryNode = this.root
+		let dirNode: DirectoryNode<T> = this.root
 		
 		// If filepath starts with ./, we want to skip over that because the logic below already assumes a path
 		// relative to Walker.rootPathAsString (and therefore does not need the ./ prefix)
@@ -375,7 +375,7 @@ export class Walker<T extends Payload>
 		return undefined
 	}
 	
-	nodeToPathAsString (startNode: FileNode | DirectoryNode, options = { absolute : false }): string
+	nodeToPathAsString (startNode: FileNode<T> | DirectoryNode<T>, options = { absolute : false }): string
 	{
 		const separator = path.sep
 		
@@ -401,7 +401,7 @@ export class Walker<T extends Payload>
 				: buffer
 	}
 	
-	pathAsStringToNode (filepath: string, separator = path.sep): FileNode | DirectoryNode | undefined
+	pathAsStringToNode (filepath: string, separator = path.sep): FileNode<T> | DirectoryNode<T> | undefined
 	{
 		return this.pathToNode( filepath.split(separator) )
 	}
@@ -414,10 +414,10 @@ export class Walker<T extends Payload>
 		return path.relative(this.rootPathAsString, absoluteImportPath)
 	}
 
-	isInsideDirectory (node: FileNode|DirectoryNode, fragments: string[]): boolean
+	isInsideDirectory (node: FileNode<T>|DirectoryNode<T>, fragments: string[]): boolean
 	{
 		// Track the parent
-		let parent: FileNode|DirectoryNode|null = node
+		let parent: FileNode<T>|DirectoryNode<T>|null = node
 		
 		// Track the current fragment we're trying to match
 		let i = fragments.length - 1

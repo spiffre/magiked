@@ -255,8 +255,6 @@ Deno.test("loaders, default loaders", async () =>
 	await walker.init(dir,
 	{
 		
-		sort : true,
-		
 		handlers :
 		{
 			"" : defaultTextLoader,
@@ -275,11 +273,11 @@ Deno.test("loaders, default loaders", async () =>
 		assert(config.payload.type == "json")
 		
 		// Ensure it has the right content
-		//const payload = config.payload
-		//if (payload.type == "json")
-		//{
-		//	payload
-		//}
+		assertEquals(config.payload.object,
+		{
+			"url": "https://whatever.whatever",
+			"port": "3000"
+		})
 	}
 	
 	{
@@ -290,15 +288,27 @@ Deno.test("loaders, default loaders", async () =>
 		assert(readme.kind == "FILE")
 		assert(readme.payload !== null)
 		assert(readme.payload.type == "text")
+		
+		// Ensure it has the right content
+		assertEquals(
+			readme.payload.content,
+			"This is only a test\nOf the emergency broadcast system"
+		)
 	}
 	
 	{
-		const todo = walker.pathAsStringToNode("samples/README.txt")
+		const todo = walker.pathAsStringToNode("samples/TODO")
 		
 		// Ensure we have a valid TextPayload
 		assert(todo !== undefined)
 		assert(todo.kind == "FILE")
 		assert(todo.payload !== null)
 		assert(todo.payload.type == "text")
+		
+		// Ensure it has the right content
+		assertEquals(
+			todo.payload.content,
+			"- Start with the 1st thing\n- …\n- $$$"
+		)
 	}
 });

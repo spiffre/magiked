@@ -17,27 +17,27 @@ export interface Payload
 	extension: FileExtension
 }
 
-interface Node
+interface Node<T extends Payload>
 {
 	kind: NodeKind
 	uid: number
 	name: string
-	parent: DirectoryNode|null
+	parent: DirectoryNode<T>|null
 }
 
-export interface DirectoryNode extends Node
+export interface DirectoryNode<T extends Payload = Payload> extends Node<T>
 {
 	kind: "DIRECTORY" // fixme: NodeKind.DIRECTORY type can't be used here...
 	
-	directories: Record<string, DirectoryNode|undefined>
-	files: Record<string, FileNode|undefined>
+	directories: Record<string, DirectoryNode<T>|undefined>
+	files: Record<string, FileNode<T>|undefined>
 	directoryCount: number
 	fileCount: number
 }
 
-export interface FileNode extends Node
+export interface FileNode<T extends Payload = Payload> extends Node<T>
 {
 	kind: "FILE" // fixme: NodeKind.DIRECTORY type can't be used here...
 	
-	payload: Payload|null
+	payload: T|null
 }
