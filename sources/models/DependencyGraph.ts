@@ -1,6 +1,6 @@
 
 type ValuesOf<T> = T[keyof T]
-type FileExtension = `.${string}`
+type FileExtension = `.${string}` | ''
 
 export const NodeKind =
 {
@@ -27,6 +27,8 @@ interface Node
 
 export interface DirectoryNode extends Node
 {
+	kind: "DIRECTORY" // fixme: NodeKind.DIRECTORY type can't be used here...
+	
 	directories: Record<string, DirectoryNode|undefined>
 	files: Record<string, FileNode|undefined>
 	directoryCount: number
@@ -35,5 +37,7 @@ export interface DirectoryNode extends Node
 
 export interface FileNode extends Node
 {
+	kind: "FILE" // fixme: NodeKind.DIRECTORY type can't be used here...
+	
 	payload: Payload|null
 }

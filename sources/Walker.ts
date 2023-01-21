@@ -9,7 +9,7 @@ import type { DirectoryNode, FileNode, Payload } from "./models/DependencyGraph.
 const
 {
 	readDir : readDirAsync,
-	readFile : readFileAsync,
+	readTextFile : readTextFileAsync,
 	stat : statAsync,
 	
 } = Deno
@@ -21,12 +21,20 @@ const ESPREE_PARSE_OPTIONS: EspreeParseOptions =
 	sourceType: "commonjs",
 }
 
+type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [property: string]: Json }
+  | Json[];
+
 type Handler<T> = (filepath: string) => Promise<T>
 type HandlerMapping<T extends Payload> =
 {
 	// fixme: this syntax is utterly incomprehensible
-	// Check that U is a type present in T, then get T.type -- although that's not usually what `as` means in TS...
-	[U in T as T['type']]?: Handler<T>
+	// Check that U is a type present in T, then get T.extension -- although that's not usually what `as` means in TS...
+	[U in T as T['extension']]?: Handler<T>
 };
 
 type WalkerOptions<T extends Payload> = WalkerTraversalOptions &
@@ -83,19 +91,22 @@ export class Walker<T extends Payload>
 		this.options = options
 		this.rootPathAsString = directory
 		this.rootPath = directory.split( path.sep ).slice(1)
-		this.root = await this.readDir(name, directory)
 		
 		// If in-init handlers are provided, initialize a Record<file extension, handler> mapping
 		if (this.options.handlers != undefined)
 		{
 			const extensions = Object.keys(this.options.handlers)
 			const handlers = this.options.handlers as Record<string, Handler<T>>
+			
 			for (const extension of extensions)
 			{
 				const handler = handlers[extension]
 				this.handlers.set(extension, handler)
 			}
 		}
+		
+		// Perform the initial walk
+		this.root = await this.readDir(name, directory)
 	}
 	
 	async readDir (name: string, dirpath: string, parent: DirectoryNode|null = null): Promise<DirectoryNode>
@@ -208,7 +219,7 @@ export class Walker<T extends Payload>
 		
 		// Call the onFileNodeEnter callback, if provided
 		this.options.onFileNodeEnter?.(fileNode)
-		
+
 		// If a handker is provided, use it to load the file's content and process it
 		const extension = path.extname(name)
 		const handler = this.handlers.get(extension)
@@ -455,29 +466,48 @@ export class Walker<T extends Payload>
 		// No match was found
 		return false
 	}
-	
-	// PRIVATE
-	
-	/*
-	private getFileType (filename: string): EntryType
-	{
-		const extension = path.extname(filename)
-		//const filenameWithoutExtension = path.basename(filename, extension)
-		
-		if (extension == '.js')
-		{
-			return EntryType.SOURCE
-		}
-		else if (extension == '.json') //&& filenameWithoutExtension == 'module')
-		{
-			return EntryType.JSON
-		}
-		else
-		{
-			return EntryType.UNKNOWN
-		}
+}
+
+
+export interface TextPayload extends Payload
+{
+  // fixme: How to force type and extension to be re-defined ?
+  type : 'text'
+  extension : '.txt' | ''
+
+  content : string
+}
+
+export async function defaultTextLoader (filepath: string): Promise<TextPayload>
+{
+	const content = await readTextFileAsync(filepath)
+
+	return {
+		type : 'text',
+		extension : '.txt',
+		content
 	}
-	*/
+}
+
+export interface JsonPayload extends Payload
+{
+	// fixme: How to force type and extension to be re-defined ?
+	type: 'json'
+	extension: '.json'
+
+	object: Json
+}
+
+export async function defaultJsonLoader (filepath: string): Promise<JsonPayload>
+{
+	const content = await readTextFileAsync(filepath)
+	const object = JSON.parse(content)
+
+	return {
+		type : 'json',
+		extension : '.json',
+		object
+	}
 }
 
 
