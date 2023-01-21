@@ -1,7 +1,8 @@
-import { assertArrayIncludes, assertEquals, assertNotEquals, assertStrictEquals } from "https://deno.land/std@0.156.0/testing/asserts.ts";
+import { assert, assertArrayIncludes, assertEquals, assertNotEquals, assertStrictEquals } from "https://deno.land/std@0.156.0/testing/asserts.ts";
 import * as path from "https://deno.land/std@0.156.0/path/mod.ts"
 
-import type { DirectoryNode, FileNode } from "./Walker.ts"
+import { Walker, defaultJsonLoader, defaultTextLoader } from "./Walker.ts"
+import type { DirectoryNode, FileNode, JsonPayload, TextPayload } from "./Walker.ts"
 
 const DATA_BASE_PATH = "tests/data"
 
@@ -243,4 +244,61 @@ Deno.test("helper, isInsideDirectory", async () =>
 	
 	// Compare with the expectation that the order is correct
 	assertEquals(output, expected)
+});
+
+
+Deno.test("loaders, default loaders", async () =>
+{
+	const dir = path.resolve(DATA_BASE_PATH, "default-loaders")
+
+	const walker = new Walker<JsonPayload|TextPayload>()
+	await walker.init(dir,
+	{
+		
+		sort : true,
+		
+		handlers :
+		{
+			"" : defaultTextLoader,
+			".txt" : defaultTextLoader,
+			".json" : defaultJsonLoader,
+		}
+	})
+
+	{
+		const config = walker.pathAsStringToNode("samples/config.json")
+		
+		// Ensure we have a valid JsonPayload
+		assert(config !== undefined)
+		assert(config.kind == "FILE")
+		assert(config.payload !== null)
+		assert(config.payload.type == "json")
+		
+		// Ensure it has the right content
+		//const payload = config.payload
+		//if (payload.type == "json")
+		//{
+		//	payload
+		//}
+	}
+	
+	{
+		const readme = walker.pathAsStringToNode("samples/README.txt")
+		
+		// Ensure we have a valid TextPayload
+		assert(readme !== undefined)
+		assert(readme.kind == "FILE")
+		assert(readme.payload !== null)
+		assert(readme.payload.type == "text")
+	}
+	
+	{
+		const todo = walker.pathAsStringToNode("samples/README.txt")
+		
+		// Ensure we have a valid TextPayload
+		assert(todo !== undefined)
+		assert(todo.kind == "FILE")
+		assert(todo.payload !== null)
+		assert(todo.payload.type == "text")
+	}
 });
