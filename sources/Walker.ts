@@ -3,25 +3,17 @@ import { assert } from "https://deno.land/std@0.156.0/testing/asserts.ts";
 
 import { espree, type EspreeParseOptions, type EspreeAst, type WithLocation } from "../dependencies/espree/index.ts";
 
-import
+import { NodeKind } from "./models/DependencyGraph.ts"
+import type { DirectoryNode, FileNode, Payload } from "./models/DependencyGraph.ts"
+
+const
 {
-	type DirectoryNode,
-	type FileNode,
+	readDir : readDirAsync,
+	readFile : readFileAsync,
+	stat : statAsync,
 	
-	EntryType,
+} = Deno
 
-} from "./models/DependencyGraph.ts"
-
-import
-{
-	Payload
-
-} from "./models/MetaAst.ts"
-
-
-const readDirAsync = Deno.readDir
-const readFileAsync = Deno.readFile
-const statsAsync = Deno.stat
 
 const ESPREE_PARSE_OPTIONS: EspreeParseOptions =
 {
@@ -29,10 +21,20 @@ const ESPREE_PARSE_OPTIONS: EspreeParseOptions =
 	sourceType: "commonjs",
 }
 
-type WalkerOptions = WalkerTraversalOptions &
+type Handler<T> = (filepath: string) => Promise<T>
+type HandlerMapping<T extends Payload> =
+{
+	// fixme: this syntax is utterly incomprehensible
+	// Check that U is a type present in T, then get T.type -- although that's not usually what `as` means in TS...
+	[U in T as T['type']]?: Handler<T>
+};
+
+type WalkerOptions<T extends Payload> = WalkerTraversalOptions &
 {
 	sort?: boolean
 	filter?: (name: string, fullpath: string) => boolean
+	
+	handlers?: HandlerMapping<T>
 }
 
 interface WalkerTraversalOptions
@@ -47,7 +49,7 @@ interface WalkerTraversalOptions
 export type { FileNode, DirectoryNode, Payload }
 
 
-export class Walker
+export class Walker<T extends Payload>
 {
 	root: DirectoryNode|null
 	rootPath: string[]
@@ -55,8 +57,10 @@ export class Walker
 	
 	currentFileId: number
 	
-	options: WalkerOptions
+	options: WalkerOptions<T>
 	errors: string[]
+	
+	private handlers: Map<string, Handler<T>>
 
 	constructor ()
 	{
@@ -66,9 +70,10 @@ export class Walker
 		this.rootPath = []
 		this.options = {}
 		this.errors = []
+		this.handlers = new Map()
 	}
 	
-	async init (directory: string, options: WalkerOptions = {}): Promise<void>
+	async init (directory: string, options: WalkerOptions<T> = {}): Promise<void>
 	{
 		// Ensure the path is absolute and normalized
 		directory = path.resolve(directory)
@@ -79,6 +84,18 @@ export class Walker
 		this.rootPathAsString = directory
 		this.rootPath = directory.split( path.sep ).slice(1)
 		this.root = await this.readDir(name, directory)
+		
+		// If in-init handlers are provided, initialize a Record<file extension, handler> mapping
+		if (this.options.handlers != undefined)
+		{
+			const extensions = Object.keys(this.options.handlers)
+			const handlers = this.options.handlers as Record<string, Handler<T>>
+			for (const extension of extensions)
+			{
+				const handler = handlers[extension]
+				this.handlers.set(extension, handler)
+			}
+		}
 	}
 	
 	async readDir (name: string, dirpath: string, parent: DirectoryNode|null = null): Promise<DirectoryNode>
@@ -89,10 +106,10 @@ export class Walker
 		// Create a placeholder entry object
 		const dirNode: DirectoryNode =
 		{
+			kind : NodeKind.DIRECTORY,
 			uid : this.currentFileId++,
 			name,
 			parent,
-			type : EntryType.DIRECTORY,
 			
 			directories,
 			files,
@@ -128,7 +145,7 @@ export class Walker
 			}
 			
 			const entryFullpath = path.resolve(dirpath, fileOrDirectory.name)
-			const stats = await statsAsync(entryFullpath)
+			const stats = await statAsync(entryFullpath)
 			
 			if (stats.isDirectory)
 			{
@@ -180,20 +197,25 @@ export class Walker
 	
 	async readFile (name: string, filepath: string, parent: DirectoryNode): Promise<FileNode>
 	{
-		const uid = this.currentFileId++
-		const type = this.getFileType(name)
-		
 		const fileNode: FileNode =
 		{
+			kind : NodeKind.FILE,
+			uid : this.currentFileId++,
 			name,
-			uid,
-			type,
 			parent,
 			payload : null
 		}
 		
 		// Call the onFileNodeEnter callback, if provided
 		this.options.onFileNodeEnter?.(fileNode)
+		
+		// If a handker is provided, use it to load the file's content and process it
+		const extension = path.extname(name)
+		const handler = this.handlers.get(extension)
+		if (handler)
+		{
+			fileNode.payload = await handler(filepath)
+		}
 		
 		// Call the onFileNodeLeave callback, if provided
 		this.options.onFileNodeLeave?.(fileNode)
@@ -436,6 +458,7 @@ export class Walker
 	
 	// PRIVATE
 	
+	/*
 	private getFileType (filename: string): EntryType
 	{
 		const extension = path.extname(filename)
@@ -454,6 +477,7 @@ export class Walker
 			return EntryType.UNKNOWN
 		}
 	}
+	*/
 }
 
 
