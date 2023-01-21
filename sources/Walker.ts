@@ -359,18 +359,20 @@ export class Walker<T extends Payload>
 		}
 		
 		const last = filepath[i]
-		const isFile = path.extname(last) != ''
 		
-		if (isFile)
+		const file = dirNode.files[last]
+		if (file)
 		{
-			const fileFoundOrNot = dirNode.files[last]
-			return fileFoundOrNot
+			return file
 		}
-		else
+		
+		const directory = dirNode.directories[last]
+		if (directory)
 		{
-			const directoryFoundOrNot = dirNode.directories[last]
-			return directoryFoundOrNot
+			return directory
 		}
+		
+		return undefined
 	}
 	
 	nodeToPathAsString (startNode: FileNode | DirectoryNode, options = { absolute : false }): string
