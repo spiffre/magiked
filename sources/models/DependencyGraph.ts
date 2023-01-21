@@ -21,8 +21,8 @@ interface Node
 
 export interface DirectoryNode extends Node
 {
-	directories: Record<string, DirectoryNode>
-	files: Record<string, FileNode>
+	directories: Record<string, DirectoryNode|undefined>
+	files: Record<string, FileNode|undefined>
 	directoryCount: number
 	fileCount: number
 }

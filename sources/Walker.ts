@@ -213,6 +213,9 @@ export class Walker
 				// We have to do it in series, otherwise we can't guarantee the order in which the callbacks are called
 				for (const file of Object.values(directory.files))
 				{
+					// When we iterate over `files` we know nothing's `undefined`
+					assert(file)
+					
 					await options.onFileNodeEnter(file)
 				}
 			}
@@ -223,6 +226,9 @@ export class Walker
 				// We have to do it in series, otherwise we can't guarantee the order in which the callbacks are called
 				for (const subdirectory of Object.values(directory.directories))
 				{
+					// When we iterate over `directories` we know nothing's `undefined`
+					assert(subdirectory)
+					
 					await options.onDirectoryNodeEnter(subdirectory)
 				}
 			}
@@ -230,6 +236,9 @@ export class Walker
 			// Process all the subdirectories // Object.values(directory.directories).forEach(traverse)
 			for (const subdirectory of Object.values(directory.directories))
 			{
+				// When we iterate over `directories` we know nothing's `undefined`
+				assert(subdirectory)
+				
 				await traverse(subdirectory)
 			}
 			
@@ -239,6 +248,9 @@ export class Walker
 				// We have to do it in series, otherwise we can't guarantee the order in which the callbacks are called
 				for (const file of Object.values(directory.files))
 				{
+					// When we iterate over `file` we know nothing's `undefined`
+					assert(file)
+				
 					await options.onFileNodeLeave(file)
 				}
 			}
@@ -249,6 +261,9 @@ export class Walker
 				// We have to do it in series, otherwise we can't guarantee the order in which the callbacks are called
 				for (const subdirectory of Object.values(directory.directories))
 				{
+					// When we iterate over `directories` we know nothing's `undefined`
+					assert(subdirectory)
+				
 					await options.onDirectoryNodeLeave(subdirectory)
 				}
 			}
@@ -280,7 +295,7 @@ export class Walker
 				: buffer
 	}
 	
-	pathToNode (filepath: string[]): FileNode | DirectoryNode
+	pathToNode (filepath: string[]): FileNode | DirectoryNode | undefined
 	{
 		if (this.root == null)
 		{
@@ -300,12 +315,14 @@ export class Walker
 		for (; i < filepath.length - 1; i++)
 		{
 			const part = filepath[i]
-			dirNode = dirNode.directories[part]
+			const temp = dirNode.directories[part]
 			
-			if (typeof dirNode == 'undefined')
+			if (temp == undefined)
 			{
-				throw new Error(`Path does not match any node`) // fixme: output up to which part the path was valid
+				return undefined
 			}
+			
+			dirNode = temp
 		}
 		
 		const last = filepath[i]
@@ -313,21 +330,13 @@ export class Walker
 		
 		if (isFile)
 		{
-			const foundFile = dirNode.files[last]
-			if (foundFile == undefined)
-			{
-				throw new Error(`Path does not match any node`)
-			}
-			return foundFile
+			const fileFoundOrNot = dirNode.files[last]
+			return fileFoundOrNot
 		}
 		else
 		{
-			const foundDir = dirNode.directories[last]
-			if (foundDir == undefined)
-			{
-				throw new Error(`Path does not match any node`)
-			}
-			return foundDir
+			const directoryFoundOrNot = dirNode.directories[last]
+			return directoryFoundOrNot
 		}
 	}
 	
@@ -357,9 +366,9 @@ export class Walker
 				: buffer
 	}
 	
-	pathAsStringToNode (filepath: string): FileNode | DirectoryNode | null
+	pathAsStringToNode (filepath: string, separator = path.sep): FileNode | DirectoryNode | undefined
 	{
-		return this.pathToNode( filepath.split(path.sep) )
+		return this.pathToNode( filepath.split(separator) )
 	}
 	
 	// HELPERS

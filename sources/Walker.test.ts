@@ -1,7 +1,7 @@
-import { assertArrayIncludes, assertEquals } from "https://deno.land/std@0.156.0/testing/asserts.ts";
+import { assertArrayIncludes, assertEquals, assertNotEquals, assertStrictEquals } from "https://deno.land/std@0.156.0/testing/asserts.ts";
 import * as path from "https://deno.land/std@0.156.0/path/mod.ts"
 
-import { Walker } from "./Walker.ts"
+import type { DirectoryNode, FileNode } from "./Walker.ts"
 
 const DATA_BASE_PATH = "tests/data"
 
@@ -43,6 +43,101 @@ Deno.test("base-test, no sorting", async () =>
 	assertEquals(output.length, expected.length)
 });
 
+Deno.test("base-test, pathToNode/pathAsStringToNode, directory", async () =>
+{
+	const dir = path.resolve(DATA_BASE_PATH, "base-test")
+	
+	const walker = new Walker()
+	await walker.init(dir)
+
+	const node = walker.pathToNode([ "ModuleA" ])
+	const node2 = walker.pathAsStringToNode("ModuleA")
+	
+	assertNotEquals(node, undefined)
+	assertStrictEquals(node, node2)
+	
+	assertEquals(node?.kind, "DIRECTORY")
+	assertEquals(node?.name, "ModuleA")
+});
+
+Deno.test("base-test, pathToNode/pathAsStringToNode, file", async () =>
+{
+	const dir = path.resolve(DATA_BASE_PATH, "base-test")
+	
+	const walker = new Walker()
+	await walker.init(dir)
+
+	const node = walker.pathToNode([ "ModuleA", "file1.js" ])
+	const node2 = walker.pathAsStringToNode("ModuleA/file1.js")
+	
+	assertNotEquals(node, undefined)
+	assertStrictEquals(node, node2)
+	
+	assertEquals(node?.kind, "FILE")
+	assertEquals(node?.name, "file1.js")
+});
+
+Deno.test("base-test, pathToNode/pathAsStringToNode, not found", async () =>
+{
+	const dir = path.resolve(DATA_BASE_PATH, "base-test")
+	
+	const walker = new Walker()
+	await walker.init(dir)
+
+	const node = walker.pathToNode([ "ModuleC", "file7.js" ])
+	const node2 = walker.pathAsStringToNode("ModuleC/file7.js")
+	
+	assertEquals(node, undefined)
+	assertStrictEquals(node, node2)
+});
+
+Deno.test("base-test, nodeToPath/nodeToPathAsString, directory", async () =>
+{
+	const dir = path.resolve(DATA_BASE_PATH, "base-test")
+	const nodes: DirectoryNode[] = []
+	
+	const walker = new Walker()
+	await walker.init(dir,
+	{
+		sort : true,
+		
+		onDirectoryNodeEnter (node)
+		{
+			nodes.push(node)
+		}
+	})
+
+	const directoryNode = nodes[1]
+	const directoryPathAsString = walker.nodeToPathAsString(directoryNode, { absolute : false })
+	const directoryPathAsParts = walker.nodeToPath(directoryNode, { absolute : false })
+	
+	assertEquals(directoryPathAsString, "ModuleA")
+	assertEquals(directoryPathAsParts, [ "ModuleA" ])
+});
+
+Deno.test("base-test, nodeToPath/nodeToPathAsString, file", async () =>
+{
+	const dir = path.resolve(DATA_BASE_PATH, "base-test")
+	const nodes: FileNode[] = []
+	
+	const walker = new Walker()
+	await walker.init(dir,
+	{
+		sort : true,
+		
+		onFileNodeEnter (node)
+		{
+			nodes.push(node)
+		}
+	})
+
+	const fileNode = nodes[0]
+	const filePathAsString = walker.nodeToPathAsString(fileNode, { absolute : false })
+	const filePathAsParts = walker.nodeToPath(fileNode, { absolute : false })
+	
+	assertEquals(filePathAsString, "ModuleA/file1.js")
+	assertEquals(filePathAsParts, [ "ModuleA", "file1.js" ])
+});
 
 Deno.test("base-test, with sorting, on enter", async () =>
 {
