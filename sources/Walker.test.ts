@@ -1,4 +1,4 @@
-import { assert, assertArrayIncludes, assertEquals, assertNotEquals, assertStrictEquals } from "https://deno.land/std@0.156.0/testing/asserts.ts";
+import { assert, assertArrayIncludes, assertEquals, assertExists, assertNotEquals, assertStrictEquals } from "https://deno.land/std@0.156.0/testing/asserts.ts";
 import * as path from "https://deno.land/std@0.156.0/path/mod.ts"
 
 import { Walker, defaultJsonLoader, defaultTextLoader, defaultJavascriptLoader } from "./Walker.ts"
@@ -350,7 +350,7 @@ Deno.test("loaders, default loaders (txt, json)", async () =>
 	}
 });
 
-Deno.test("loaders, default loaders (js)", async () =>
+Deno.test("loaders, default loaders (js, es modules)", async () =>
 {
 	const dir = path.resolve(DATA_BASE_PATH, "default-loaders/sources")
 
@@ -358,7 +358,56 @@ Deno.test("loaders, default loaders (js)", async () =>
 	await walker.init(dir,
 	{
 		
-		handlers : { ".js" : { loader : defaultJavascriptLoader } } // fixme: need to be able to specify loader options (in this case, parser option es, not cjs)
+
+	{
+		const libraryFile = walker.pathAsStringToNode("lib.js")
+		
+		// Ensure we have a valid JsonPayload
+		assert(libraryFile !== undefined)
+		assert(libraryFile.kind == "FILE")
+		assert(libraryFile.payload !== null)
+		assert(libraryFile.payload.type == "javascript")
+		
+		assert(libraryFile.payload.rootAst?.body)
+		
+		const [ addExport, subtractExport ] = libraryFile.payload.rootAst.body
+
+		assertExists(addExport)
+		assert(addExport.type == "ExportNamedDeclaration")
+		assertExists(addExport.declaration)
+		assert(addExport.declaration.type == "FunctionDeclaration")
+		assertExists(addExport.declaration.id)
+		assert(addExport.declaration.id.name == "add")
+		
+		assertExists(subtractExport)
+		assert(subtractExport.type == "ExportNamedDeclaration")
+		assertExists(subtractExport.declaration)
+		assert(subtractExport.declaration.type == "FunctionDeclaration")
+		assertExists(subtractExport.declaration.id)
+		assert(subtractExport.declaration.id.name == "subtract")
+	}
+	
+	{
+		const mainFile = walker.pathAsStringToNode("main.js")
+		
+		// Ensure we have a valid JsonPayload
+		assert(mainFile !== undefined)
+		assert(mainFile.kind == "FILE")
+		assert(mainFile.payload !== null)
+		assert(mainFile.payload.type == "javascript")
+		
+		const [ libraryImport ] = mainFile.payload.rootAst.body
+		
+		assertExists(libraryImport)
+		assert(libraryImport.type == "ImportDeclaration")
+		assertExists(libraryImport.specifiers)
+		assert(libraryImport.specifiers[0]?.type == "ImportSpecifier")
+		assert(libraryImport.specifiers[0].imported.name == "a")
+		assert(libraryImport.specifiers[1]?.type == "ImportSpecifier")
+		assert(libraryImport.specifiers[1].imported.name == "b")
+	}
+});
+
 	})
 
 	{
