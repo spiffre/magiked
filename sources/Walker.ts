@@ -30,9 +30,12 @@ type Json =
   | { [property: string]: Json }
   | Json[];
 
+type HandlerOptions = Record<string, unknown>
+
 interface Handler<T>
 {
-	loader: (filepath: string) => Promise<T>
+	loader: (filepath: string, options?: HandlerOptions) => Promise<T>
+	options?: HandlerOptions | (() => HandlerOptions)
 }
 
 type HandlerMapping<T extends Payload> =
@@ -230,8 +233,12 @@ export class Walker<T extends Payload>
 		const handler = this.handlers.get(extension)
 		if (handler)
 		{
-			const { loader } = handler
-			fileNode.payload = await loader(filepath)
+			const { loader, options : loaderOptions } = handler
+			const options = loaderOptions
+								? typeof loaderOptions == "function" ? loaderOptions() : loaderOptions
+								: undefined
+			
+			fileNode.payload = await loader(filepath, options)
 		}
 		
 		// Call the onFileNodeLeave callback, if provided
@@ -527,10 +534,10 @@ export interface JavascriptPayload extends Payload
 	rootAst : EspreeAst.Program
 }
 
-export async function defaultJavascriptLoader (filepath: string): Promise<JavascriptPayload>
+export async function defaultJavascriptLoader (filepath: string, options?: EspreeParseOptions): Promise<JavascriptPayload>
 {
 	const content = await readTextFileAsync(filepath)
-	const rootAst = espree.parse(content, ESPREE_PARSE_OPTIONS)
+	const rootAst = espree.parse(content, { ...ESPREE_PARSE_OPTIONS, ...options })
 
 	return {
 		type : 'javascript',

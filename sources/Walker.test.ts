@@ -358,6 +358,15 @@ Deno.test("loaders, default loaders (js, es modules)", async () =>
 	await walker.init(dir,
 	{
 		
+		handlers :
+		{
+			".js" :
+			{
+				loader : defaultJavascriptLoader,
+				options : { sourceType : "module" },
+			}
+		}
+	})
 
 	{
 		const libraryFile = walker.pathAsStringToNode("lib.js")
