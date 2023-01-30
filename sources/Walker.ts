@@ -4,8 +4,8 @@ import { assert } from "https://deno.land/std@0.156.0/testing/asserts.ts";
 import { espree } from "../dependencies/espree/index.ts";
 import type { EspreeParseOptions, EspreeAst } from "../dependencies/espree/index.ts";
 
-import { NodeKind } from "./models/DependencyGraph.ts"
-import type { DirectoryNode, FileNode, Payload } from "./models/DependencyGraph.ts"
+import { NodeKind } from "./Graph.ts"
+import type { DirectoryNode, FileNode, Payload } from "./Graph.ts"
 
 const
 {
