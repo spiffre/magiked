@@ -1,79 +1,13 @@
 {
 	"version": "0.2.0",
-	"configurations": [
-		{
-			// Beware that this VSCode extension: https://marketplace.visualstudio.com/items?itemName=denoland.vscode-deno
-			// must be installed, then initialized via "Deno: Initialize Workspace Configuration" from the Command Palette
-			"request": "launch",
-			"name": "Debug Migrate",
-			"type": "node",
-			"program": "${workspaceFolder}/sources/main.ts",
-			"cwd": "${workspaceFolder}",
-			"runtimeExecutable": "/opt/homebrew/bin/deno",
-			"runtimeArgs": [
-				"run",
-				"--inspect-brk=127.0.0.1:9231",
-				"--allow-all",
-				"--import-map", "./import_map.json"
-			],
-			"attachSimplePort": 9231,
-			"outputCapture": "std",
-			"args": [
-				"migrate"
-			]
-		},
-		
-		{
-			// Beware that this VSCode extension: https://marketplace.visualstudio.com/items?itemName=denoland.vscode-deno
-			// must be installed, then initialized via "Deno: Initialize Workspace Configuration" from the Command Palette
-			"request": "launch",
-			"name": "Debug Delete",
-			"type": "node",
-			"program": "${workspaceFolder}/sources/main.ts",
-			"cwd": "${workspaceFolder}",
-			"runtimeExecutable": "/opt/homebrew/bin/deno",
-			"runtimeArgs": [
-				"run",
-				"--inspect-brk=127.0.0.1:9231",
-				"--allow-all",
-				"--import-map", "./import_map.json"
-			],
-			"attachSimplePort": 9231,
-			"outputCapture": "std",
-			"args": [
-				"delete"
-			]
-		},
-		
-		{
-			// Beware that this VSCode extension: https://marketplace.visualstudio.com/items?itemName=denoland.vscode-deno
-			// must be installed, then initialized via "Deno: Initialize Workspace Configuration" from the Command Palette
-			"request": "launch",
-			"name": "Debug Check",
-			"type": "node",
-			"program": "${workspaceFolder}/sources/main.ts",
-			"cwd": "${workspaceFolder}",
-			"runtimeExecutable": "/opt/homebrew/bin/deno",
-			"runtimeArgs": [
-				"run",
-				"--inspect-brk=127.0.0.1:9231",
-				"--allow-all",
-				"--import-map", "./import_map.json"
-			],
-			"attachSimplePort": 9231,
-			"outputCapture": "std",
-			"args": [
-				"check"
-			]
-		},
-		
+	"configurations":
+	[
 		{
 			// Beware that this VSCode extension: https://marketplace.visualstudio.com/items?itemName=denoland.vscode-deno
 			// must be installed, then initialized via "Deno: Initialize Workspace Configuration" from the Command Palette
 			"request": "launch",
 			"name": "Debug Test",
 			"type": "node",
-			//"program": "${workspaceFolder}/sources/main.ts",
 			"cwd": "${workspaceFolder}",
 			"runtimeExecutable": "/opt/homebrew/bin/deno",
 			"runtimeArgs": [
