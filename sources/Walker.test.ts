@@ -248,7 +248,7 @@ Deno.test("helper, isInsideDirectory", async () =>
 
 Deno.test("loaders, no loaders", async () =>
 {
-	const dir = path.resolve(DATA_BASE_PATH, "default-loaders")
+	const dir = path.resolve(DATA_BASE_PATH, "default-loaders", "support")
 
 	const walker = new Walker<JsonPayload|TextPayload>()
 	await walker.init(dir,
@@ -257,7 +257,7 @@ Deno.test("loaders, no loaders", async () =>
 	})
 
 	{
-		const config = walker.pathAsStringToNode("support/config.json")
+		const config = walker.pathAsStringToNode("config.json")
 		
 		// Ensure we have a valid JsonPayload
 		assert(config !== undefined)
@@ -266,7 +266,7 @@ Deno.test("loaders, no loaders", async () =>
 	}
 	
 	{
-		const readme = walker.pathAsStringToNode("support/README.txt")
+		const readme = walker.pathAsStringToNode("README.txt")
 		
 		// Ensure we have a valid TextPayload
 		assert(readme !== undefined)
@@ -275,7 +275,7 @@ Deno.test("loaders, no loaders", async () =>
 	}
 	
 	{
-		const todo = walker.pathAsStringToNode("support/TODO")
+		const todo = walker.pathAsStringToNode("TODO")
 		
 		// Ensure we have a valid TextPayload
 		assert(todo !== undefined)
@@ -301,7 +301,7 @@ Deno.test("loaders, default loaders", async () =>
 	})
 
 	{
-		const config = walker.pathAsStringToNode("support/config.json")
+		const config = walker.pathAsStringToNode("config.json")
 		
 		// Ensure we have a valid JsonPayload
 		assert(config !== undefined)
@@ -318,7 +318,7 @@ Deno.test("loaders, default loaders", async () =>
 	}
 	
 	{
-		const readme = walker.pathAsStringToNode("support/README.txt")
+		const readme = walker.pathAsStringToNode("README.txt")
 		
 		// Ensure we have a valid TextPayload
 		assert(readme !== undefined)
@@ -334,7 +334,7 @@ Deno.test("loaders, default loaders", async () =>
 	}
 	
 	{
-		const todo = walker.pathAsStringToNode("support/TODO")
+		const todo = walker.pathAsStringToNode("TODO")
 		
 		// Ensure we have a valid TextPayload
 		assert(todo !== undefined)
