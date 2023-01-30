@@ -1,7 +1,8 @@
 import * as path from "https://deno.land/std@0.156.0/path/mod.ts"
 import { assert } from "https://deno.land/std@0.156.0/testing/asserts.ts";
 
-import { espree, type EspreeParseOptions, type EspreeAst, type WithLocation } from "../dependencies/espree/index.ts";
+import { espree } from "../dependencies/espree/index.ts";
+import type { EspreeParseOptions, EspreeAst } from "../dependencies/espree/index.ts";
 
 import { NodeKind } from "./models/DependencyGraph.ts"
 import type { DirectoryNode, FileNode, Payload } from "./models/DependencyGraph.ts"
@@ -18,7 +19,7 @@ const
 const ESPREE_PARSE_OPTIONS: EspreeParseOptions =
 {
 	ecmaVersion : 11,
-	sourceType: "commonjs",
+	sourceType: "module",
 }
 
 type Json =
@@ -509,6 +510,28 @@ export async function defaultJsonLoader (filepath: string): Promise<JsonPayload>
 		type : 'json',
 		extension : '.json',
 		object
+	}
+}
+
+export interface JavascriptPayload extends Payload
+{
+	// fixme: How to force type and extension to be re-defined ?
+	type: 'javascript'
+	extension: '.js'
+
+	rootAst : EspreeAst.Program
+}
+
+export async function defaultJavascriptLoader (filepath: string): Promise<JavascriptPayload>
+{
+	const content = await readTextFileAsync(filepath)
+	const rootAst = espree.parse(content, ESPREE_PARSE_OPTIONS)
+
+	return {
+		type : 'javascript',
+		extension : '.js',
+		
+		rootAst
 	}
 }
 

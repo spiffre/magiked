@@ -1,8 +1,8 @@
 import { assert, assertArrayIncludes, assertEquals, assertNotEquals, assertStrictEquals } from "https://deno.land/std@0.156.0/testing/asserts.ts";
 import * as path from "https://deno.land/std@0.156.0/path/mod.ts"
 
-import { Walker, defaultJsonLoader, defaultTextLoader } from "./Walker.ts"
-import type { DirectoryNode, FileNode, JsonPayload, TextPayload } from "./Walker.ts"
+import { Walker, defaultJsonLoader, defaultTextLoader, defaultJavascriptLoader } from "./Walker.ts"
+import type { DirectoryNode, FileNode, JsonPayload, TextPayload, JavascriptPayload } from "./Walker.ts"
 
 const DATA_BASE_PATH = "tests/data"
 
@@ -284,9 +284,9 @@ Deno.test("loaders, no loaders", async () =>
 	}
 });
 
-Deno.test("loaders, default loaders", async () =>
+Deno.test("loaders, default loaders (txt, json)", async () =>
 {
-	const dir = path.resolve(DATA_BASE_PATH, "default-loaders")
+	const dir = path.resolve(DATA_BASE_PATH, "default-loaders", "support")
 
 	const walker = new Walker<JsonPayload|TextPayload>()
 	await walker.init(dir,
@@ -349,3 +349,41 @@ Deno.test("loaders, default loaders", async () =>
 		)
 	}
 });
+
+Deno.test("loaders, default loaders (js)", async () =>
+{
+	const dir = path.resolve(DATA_BASE_PATH, "default-loaders/sources")
+
+	const walker = new Walker<JavascriptPayload>()
+	await walker.init(dir,
+	{
+		
+		handlers : { ".js" : defaultJavascriptLoader } // fixme: need to be able to specify loader options (in this case, parser option es, not cjs)
+	})
+
+	{
+		const libraryFile = walker.pathAsStringToNode("lib.js")
+		
+		// Ensure we have a valid JsonPayload
+		assert(libraryFile !== undefined)
+		assert(libraryFile.kind == "FILE")
+		assert(libraryFile.payload !== null)
+		assert(libraryFile.payload.type == "javascript")
+	}
+	
+	{
+		const mainFile = walker.pathAsStringToNode("main.js")
+		
+		// Ensure we have a valid JsonPayload
+		assert(mainFile !== undefined)
+		assert(mainFile.kind == "FILE")
+		assert(mainFile.payload !== null)
+		assert(mainFile.payload.type == "javascript")
+	}
+});
+
+
+// Test filter() as well
+// Maybe split walker.init(rootDir, options, traverseOptions)
+// We get walker.traverse(traverseOptions)
+// Are 'handlers' traverseOptions ? 
