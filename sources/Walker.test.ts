@@ -294,9 +294,9 @@ Deno.test("loaders, default loaders (txt, json)", async () =>
 		
 		handlers :
 		{
-			"" : defaultTextLoader,
-			".txt" : defaultTextLoader,
-			".json" : defaultJsonLoader,
+			"" : { loader : defaultTextLoader },
+			".txt" : { loader : defaultTextLoader },
+			".json" : { loader : defaultJsonLoader },
 		}
 	})
 
@@ -358,7 +358,7 @@ Deno.test("loaders, default loaders (js)", async () =>
 	await walker.init(dir,
 	{
 		
-		handlers : { ".js" : defaultJavascriptLoader } // fixme: need to be able to specify loader options (in this case, parser option es, not cjs)
+		handlers : { ".js" : { loader : defaultJavascriptLoader } } // fixme: need to be able to specify loader options (in this case, parser option es, not cjs)
 	})
 
 	{

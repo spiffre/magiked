@@ -30,7 +30,11 @@ type Json =
   | { [property: string]: Json }
   | Json[];
 
-type Handler<T> = (filepath: string) => Promise<T>
+interface Handler<T>
+{
+	loader: (filepath: string) => Promise<T>
+}
+
 type HandlerMapping<T extends Payload> =
 {
 	// fixme: this syntax is utterly incomprehensible
@@ -226,7 +230,8 @@ export class Walker<T extends Payload>
 		const handler = this.handlers.get(extension)
 		if (handler)
 		{
-			fileNode.payload = await handler(filepath)
+			const { loader } = handler
+			fileNode.payload = await loader(filepath)
 		}
 		
 		// Call the onFileNodeLeave callback, if provided
