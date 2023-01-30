@@ -1,5 +1,5 @@
 {
-  "name": "repo-crawler",
+  "name": "@spiffre/magiked",
   "version": "1.0.0",
   "scripts": {
     "tc": "deno check ./sources/main.ts",
