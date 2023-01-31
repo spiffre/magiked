@@ -417,6 +417,22 @@ Deno.test("loaders, default loaders (js, es modules)", async () =>
 	}
 });
 
+Deno.test("loaders, default loaders (js, cjs modules)", async () =>
+{
+	const dir = path.resolve(DATA_BASE_PATH, "default-loaders/node")
+
+	const walker = new Walker<JavascriptPayload>()
+	await walker.init(dir,
+	{
+		
+		handlers :
+		{
+			".js" :
+			{
+				loader : defaultJavascriptLoader,
+				options : { sourceType : "commonjs" },
+			}
+		}
 	})
 
 	{
@@ -427,6 +443,19 @@ Deno.test("loaders, default loaders (js, es modules)", async () =>
 		assert(libraryFile.kind == "FILE")
 		assert(libraryFile.payload !== null)
 		assert(libraryFile.payload.type == "javascript")
+		
+		const topLevelStatementsOrExpressions = libraryFile.payload.rootAst.body
+		const last = topLevelStatementsOrExpressions.pop()!
+		
+		assert(last.type == "ExpressionStatement")
+		
+		assert(last.expression.type == "AssignmentExpression")
+		assert(last.expression.left.type == "MemberExpression")
+		assert(last.expression.left.property.type == "Identifier")
+		assert(last.expression.left.property.name == "exports")
+
+		assert(last.expression.left.object.type == "Identifier")
+		assert(last.expression.left.object.name == "module")
 	}
 	
 	{
@@ -437,6 +466,16 @@ Deno.test("loaders, default loaders (js, es modules)", async () =>
 		assert(mainFile.kind == "FILE")
 		assert(mainFile.payload !== null)
 		assert(mainFile.payload.type == "javascript")
+		
+		const topLevelStatementsOrExpressions = mainFile.payload.rootAst.body
+		const first = topLevelStatementsOrExpressions.shift()!
+		
+		assert(first.type == "VariableDeclaration")
+		assert(first.declarations[0].type == "VariableDeclarator")
+		assertExists(first.declarations[0].init)
+		assert(first.declarations[0].init.type == "CallExpression")
+		assert(first.declarations[0].init.callee.type == "Identifier")
+		assert(first.declarations[0].init.callee.name == "require")
 	}
 });
 
