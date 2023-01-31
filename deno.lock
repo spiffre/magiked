@@ -17,6 +17,10 @@
     "https://deno.land/std@0.156.0/testing/_format.ts": "cd11136e1797791045e639e9f0f4640d5b4166148796cad37e6ef75f7d7f3832",
     "https://deno.land/std@0.156.0/testing/asserts.ts": "8696c488bc98d8d175e74dc652a0ffbc7fca93858da01edc57ed33c1148345da",
     "https://esm.sh/v94/acorn-jsx@5.3.2/es2022/acorn-jsx.js": "32795fba0a2580db654432f7adfc257b542f26926ddef05aff9041344c546b51",
-    "https://esm.sh/v94/acorn@8.8.0/es2022/acorn.js": "65c8c03d55c023dea54401a468204db8b588a31ddbd04d9db07b4432330978f5"
+    "https://esm.sh/v94/acorn@8.8.0/es2022/acorn.js": "65c8c03d55c023dea54401a468204db8b588a31ddbd04d9db07b4432330978f5",
+    "https://raw.githubusercontent.com/spiffre/magiked/v0.3.1/dependencies/eslint-visitor-keys@3.3.0/mod.js": "387ac908213bd8977b75557d1588bbe821a85d20186859c3396a25ff19ed4c50",
+    "https://raw.githubusercontent.com/spiffre/magiked/v0.3.1/dependencies/espree%409.4.0/ast.d.ts": "7d6ec5a2b671761ed84591abf62df69be5f698ad906dba432ebefb6a36588ceb",
+    "https://raw.githubusercontent.com/spiffre/magiked/v0.3.1/dependencies/espree%409.4.0/espree+evk.js": "c5167f48a13ad7942b11d61c9c69dc7628339b4eb0e0101fce8b879c1a0ba29e",
+    "https://raw.githubusercontent.com/spiffre/magiked/v0.3.1/dependencies/espree%409.4.0/mod.ts": "60614d8f01e2bdfed94a5eb128260047b9b734e5b508ed91173eccd56cd4c775"
   }
 }
