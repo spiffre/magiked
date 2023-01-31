@@ -1,6 +1,6 @@
 import type * as EspreeAst from "./ast.d.ts"
 
-import { parse } from "https://esm.sh/v94/espree@9.4.0/es2022/espree.js";
+import { parse } from "./espree+evk.js";
 
 export interface EspreeParseOptions
 {

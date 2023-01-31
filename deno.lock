@@ -16,10 +16,7 @@
     "https://deno.land/std@0.156.0/testing/_diff.ts": "a23e7fc2b4d8daa3e158fa06856bedf5334ce2a2831e8bf9e509717f455adb2c",
     "https://deno.land/std@0.156.0/testing/_format.ts": "cd11136e1797791045e639e9f0f4640d5b4166148796cad37e6ef75f7d7f3832",
     "https://deno.land/std@0.156.0/testing/asserts.ts": "8696c488bc98d8d175e74dc652a0ffbc7fca93858da01edc57ed33c1148345da",
-    "https://deno.land/std@0.157.0/_util/assert.ts": "e94f2eb37cebd7f199952e242c77654e43333c1ac4c5c700e929ea3aa5489f74",
-    "https://deno.land/std@0.157.0/flags/mod.ts": "5ecf064f28471b455be61a71b68172236151f3362c8b4a663d5aedee93179ded",
     "https://esm.sh/v94/acorn-jsx@5.3.2/es2022/acorn-jsx.js": "32795fba0a2580db654432f7adfc257b542f26926ddef05aff9041344c546b51",
-    "https://esm.sh/v94/acorn@8.8.0/es2022/acorn.js": "65c8c03d55c023dea54401a468204db8b588a31ddbd04d9db07b4432330978f5",
-    "https://esm.sh/v94/espree@9.4.0/es2022/espree.js": "abea9f83d2cfe99327bffc9d42513e6b30d6a708fe583445c75a008613c0355f"
+    "https://esm.sh/v94/acorn@8.8.0/es2022/acorn.js": "65c8c03d55c023dea54401a468204db8b588a31ddbd04d9db07b4432330978f5"
   }
 }

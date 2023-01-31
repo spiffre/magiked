@@ -1,8 +1,8 @@
 import * as path from "https://deno.land/std@0.156.0/path/mod.ts"
 import { assert } from "https://deno.land/std@0.156.0/testing/asserts.ts";
 
-import { espree } from "../dependencies/espree/index.ts";
-import type { EspreeParseOptions, EspreeAst } from "../dependencies/espree/index.ts";
+import { espree } from "../dependencies/espree@9.4.0/index.ts";
+import type { EspreeParseOptions, EspreeAst } from "../dependencies/espree@9.4.0/index.ts";
 
 import { NodeKind } from "./Graph.ts"
 import type { DirectoryNode, FileNode, Payload } from "./Graph.ts"
@@ -28,7 +28,7 @@ type Json =
   | boolean
   | null
   | { [property: string]: Json }
-  | Json[];
+  | Json[]
 
 type HandlerOptions = Record<string, unknown>
 
