@@ -1,4 +1,4 @@
-import { assert, assertArrayIncludes, assertEquals, assertExists, assertNotEquals, assertStrictEquals } from "https://deno.land/std@0.156.0/testing/asserts.ts";
+import { assert, assertArrayIncludes, assertEquals, assertExists, assertNotEquals, assertRejects, assertStrictEquals } from "https://deno.land/std@0.156.0/testing/asserts.ts";
 import * as path from "https://deno.land/std@0.156.0/path/mod.ts"
 
 import { Walker, defaultJsonLoader, defaultTextLoader, defaultJavascriptLoader } from "./Walker.ts"
@@ -417,6 +417,29 @@ Deno.test("loaders, default loaders (js, es modules)", async () =>
 	}
 });
 
+Deno.test("loaders, default loaders (js, es modules but with wrong options)", () =>
+{
+	const dir = path.resolve(DATA_BASE_PATH, "default-loaders/sources")
+
+	const walker = new Walker<JavascriptPayload>()
+	
+	assertRejects( async () =>
+	{
+		await walker.init(dir,
+			{
+				
+				handlers :
+				{
+					".js" :
+					{
+						loader : defaultJavascriptLoader,
+						options : { sourceType : "commonjs" },  // With sourceType : "commonjs" Espree cannot parse import/export statements
+					}
+				}
+			})
+	})
+});
+
 Deno.test("loaders, default loaders (js, cjs modules)", async () =>
 {
 	const dir = path.resolve(DATA_BASE_PATH, "default-loaders/node")
@@ -478,9 +501,3 @@ Deno.test("loaders, default loaders (js, cjs modules)", async () =>
 		assert(first.declarations[0].init.callee.name == "require")
 	}
 });
-
-
-// Test filter() as well
-// Maybe split walker.init(rootDir, options, traverseOptions)
-// We get walker.traverse(traverseOptions)
-// Are 'handlers' traverseOptions ? 
