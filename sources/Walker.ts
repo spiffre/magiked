@@ -546,13 +546,3 @@ export async function defaultJavascriptLoader (filepath: string, options?: Espre
 		rootAst
 	}
 }
-
-
-// fixme: todo: there's something odd about normalized path
-// - They are expressed as paths relative to Walker.rootPathAsString
-// - We ensure they start with ./
-// - In most situations, that's just noise
-// - We do need it when we want to re-write those paths because siblings end up without the ./ prefix and we would like to have it
-// - Except at this stage it's impossible to differentiate btw a package name (ie @platform/core, which does not need the prefix)
-//   and a relative path (ie client/core/System/System.js, which does need the ./ prefix)
-// - Maybe we should instead store this information when it's easy to deduce
