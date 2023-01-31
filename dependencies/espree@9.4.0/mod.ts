@@ -1,6 +1,6 @@
 import type * as EspreeAst from "./ast.d.ts"
 
-import { parse } from "./espree+evk.js";
+import { parse } from "./espree-and-evk.js";
 
 export interface EspreeParseOptions
 {
