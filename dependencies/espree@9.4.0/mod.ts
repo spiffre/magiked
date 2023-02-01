@@ -1,4 +1,4 @@
-import type * as EspreeAst from "./ast.d.ts"
+import type * as EspreeAst from "./ast.ts"
 
 import { parse } from "./espree-and-evk.js";
 
