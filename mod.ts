@@ -23,4 +23,4 @@ export
 } from "./sources/Walker.ts"
 
 // fixme: we need to extract the JavascriptLoader/Payload to a different package
-export * from "./dependencies/espree@9.4.0/ast.ts"
+export * as EspreeAst from "./dependencies/espree@9.4.0/ast.ts"
