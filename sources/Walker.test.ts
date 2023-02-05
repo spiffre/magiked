@@ -61,6 +61,26 @@ Deno.test("basic test, pathToNode/pathAsStringToNode, directory", async () =>
 	assertEquals(node?.name, "ModuleA")
 });
 
+Deno.test("basic test, pathToNode/pathAsStringToNode, directory, absolute", async () =>
+{
+	const dir = path.resolve(DATA_BASE_PATH, "basic-test")
+	
+	const walker = new Walker()
+	await walker.init(dir)
+	
+	const absolutePath = path.resolve(dir, "ModuleA")
+	const absolutePathAsParts = absolutePath.split(path.sep).slice(1)
+
+	const node = walker.pathToNode(absolutePathAsParts)
+	const node2 = walker.pathAsStringToNode(absolutePath)
+	
+	assertNotEquals(node, undefined)
+	assertStrictEquals(node, node2)
+	
+	assertEquals(node?.kind, "DIRECTORY")
+	assertEquals(node?.name, "ModuleA")
+});
+
 Deno.test("basic test, pathToNode/pathAsStringToNode, file", async () =>
 {
 	const dir = path.resolve(DATA_BASE_PATH, "basic-test")
@@ -78,7 +98,27 @@ Deno.test("basic test, pathToNode/pathAsStringToNode, file", async () =>
 	assertEquals(node?.name, "file1.js")
 });
 
-Deno.test("basic test, pathToNode/pathAsStringToNode, not found", async () =>
+Deno.test("basic test, pathToNode/pathAsStringToNode, file, absolute", async () =>
+{
+	const dir = path.resolve(DATA_BASE_PATH, "basic-test")
+	
+	const walker = new Walker()
+	await walker.init(dir)
+
+	const absolutePath = path.resolve(dir, "ModuleA", "file1.js")
+	const absolutePathAsParts = absolutePath.split(path.sep).slice(1)
+	
+	const node = walker.pathToNode(absolutePathAsParts)
+	const node2 = walker.pathAsStringToNode(absolutePath)
+	
+	assertNotEquals(node, undefined)
+	assertStrictEquals(node, node2)
+	
+	assertEquals(node?.kind, "FILE")
+	assertEquals(node?.name, "file1.js")
+});
+
+Deno.test("basic test, pathToNode/pathAsStringToNode, file, not found", async () =>
 {
 	const dir = path.resolve(DATA_BASE_PATH, "basic-test")
 	

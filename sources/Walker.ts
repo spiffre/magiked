@@ -345,7 +345,20 @@ export class Walker<T extends Payload>
 	{
 		if (this.root == null)
 		{
-			throw new Error(`Uninitialized Walker`)
+			throw new Error('Uninitialized Walker')
+		}
+		
+		// If filepath is absolute, we slice filepath so we get a path relative to the root
+		const isAbsolute = filepath[0] == this.rootPath[0]
+		if (isAbsolute)
+		{
+			let i = 0
+			while (this.rootPath[i] == filepath[i])
+			{
+				i++
+			}
+			
+			filepath = filepath.slice(i)
 		}
 		
 		// Actually we should check here if filepath[last] has an extension or not
@@ -416,7 +429,13 @@ export class Walker<T extends Payload>
 	
 	pathAsStringToNode (filepath: string, separator = path.sep): FileNode<T> | DirectoryNode<T> | undefined
 	{
-		return this.pathToNode( filepath.split(separator) )
+		const parts = filepath.split(separator)
+		const isAbsolute = path.isAbsolute(filepath)
+		if (isAbsolute)
+		{
+			return this.pathToNode(parts.slice(1))
+		}
+		return this.pathToNode(parts)
 	}
 	
 	// HELPERS
