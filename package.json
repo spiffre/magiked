@@ -2,6 +2,8 @@
   "name": "@spiffre/magiked",
   "version": "1.0.0",
   "scripts": {
-    "check": "deno check ./mod.ts"
+    "check": "deno check ./mod.ts",
+    "test": "deno test --allow-all",
+    "testw": "deno test --allow-all --watch"
   }
 }
