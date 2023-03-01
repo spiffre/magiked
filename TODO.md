@@ -1,8 +1,6 @@
 
 # Todo
 
-- SPLIT options and hooks into 2 objects
-
 - REFACTOR onDirectoryNodeLeave() and co so they take a DirectoryNode|FileNode, but also the walker itself
   That way, we don't rely on scope knowledge of walker
 

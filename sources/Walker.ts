@@ -45,12 +45,15 @@ type HandlerMapping<T extends Payload> =
 	[U in T as T['extension']]?: Handler<T>
 };
 
-type WalkerOptions<T extends Payload> = WalkerTraversalOptions<T> &
+type WalkerHooks<T extends Payload> = WalkerTraversalOptions<T> &
+{
+	handlers?: HandlerMapping<T>
+}
+
+type WalkerOptions<T extends Payload> =
 {
 	sort?: boolean
 	filter?: (name: string, fullpath: string) => boolean
-	
-	handlers?: HandlerMapping<T>
 }
 
 interface WalkerTraversalOptions<T extends Payload>
@@ -73,6 +76,7 @@ export class Walker<T extends Payload>
 	
 	currentFileId: number
 	
+	hooks: WalkerHooks<T>
 	options: WalkerOptions<T>
 	errors: string[]
 	
@@ -84,27 +88,29 @@ export class Walker<T extends Payload>
 		this.currentFileId = 0
 		this.rootPathAsString = ''
 		this.rootPath = []
+		this.hooks = {}
 		this.options = {}
 		this.errors = []
 		this.handlers = new Map()
 	}
 	
-	async init (directory: string, options: WalkerOptions<T> = {}): Promise<void>
+	async init (directory: string, hooks: WalkerHooks<T> = {}, options: WalkerOptions<T> = {}): Promise<void>
 	{
 		// Ensure the path is absolute and normalized
 		directory = path.resolve(directory)
 		
 		const name = path.basename(directory)
 		
+		this.hooks = hooks
 		this.options = options
 		this.rootPathAsString = directory
 		this.rootPath = directory.split( path.sep ).slice(1)
 		
 		// If in-init handlers are provided, initialize a Record<file extension, handler> mapping
-		if (this.options.handlers != undefined)
+		if (this.hooks.handlers != undefined)
 		{
-			const extensions = Object.keys(this.options.handlers)
-			const handlers = this.options.handlers as Record<string, Handler<T>>
+			const extensions = Object.keys(this.hooks.handlers)
+			const handlers = this.hooks.handlers as Record<string, Handler<T>>
 			
 			for (const extension of extensions)
 			{
@@ -137,7 +143,7 @@ export class Walker<T extends Payload>
 		}
 		
 		// Call the onDirectoryNodeEnter callback, if provided
-		this.options.onDirectoryNodeEnter?.(dirNode)
+		this.hooks.onDirectoryNodeEnter?.(dirNode)
 		
 		// Read the directory's content
 		const entries: Deno.DirEntry[] = []
@@ -209,7 +215,7 @@ export class Walker<T extends Payload>
 		}
 		
 		// Call the onDirectoryNodeLeave callback, if provided
-		this.options.onDirectoryNodeLeave?.(dirNode)
+		this.hooks.onDirectoryNodeLeave?.(dirNode)
 		
 		return dirNode
 	}
@@ -226,7 +232,7 @@ export class Walker<T extends Payload>
 		}
 		
 		// Call the onFileNodeEnter callback, if provided
-		this.options.onFileNodeEnter?.(fileNode)
+		this.hooks.onFileNodeEnter?.(fileNode)
 
 		// If a handler is provided, use it to load the file's content and process it
 		const extension = path.extname(name)
@@ -242,7 +248,7 @@ export class Walker<T extends Payload>
 		}
 		
 		// Call the onFileNodeLeave callback, if provided
-		this.options.onFileNodeLeave?.(fileNode)
+		this.hooks.onFileNodeLeave?.(fileNode)
 		
 		return fileNode
 	}
