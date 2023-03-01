@@ -1,7 +1,15 @@
 
 # Todo
 
-- readdir doesn't guarantee an order (such as subdirectories then files)
+- EXTRACT JS loader to a seperate package `@spiffre/magiked-espree-loader`
+
+- ADD a glob matcher
+  https://github.com/devongovett/glob-match
+  https://www.npmjs.com/package/micromatch
+    See: https://codesandbox.io/s/micromatch-sample-o7662m
+    See: https://esm.sh/v109/micromatch@4.0.5/es2022/micromatch.js ?
+
+- ADD SORT as readdir doesn't guarantee an order (such as subdirectories then files)
   We should expose a `sort()` option which lets the caller customize the sort order: they may want:
   - All directories first
   - A specific file first (such as an index file or a package.json or something)
@@ -19,4 +27,8 @@
      and a relative path (ie client/core/System/System.js, which does need the ./ prefix)
      Prepending with ./ is just storing the information when it's easy to deduce
 
+- LOOK INTO dnt and publishing those libraries to npm
+
+- ATTEMPT to use SWC in Deno
+  And publish that as @spiffre/magiked-swc-loader
 
