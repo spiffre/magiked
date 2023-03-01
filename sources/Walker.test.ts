@@ -140,12 +140,13 @@ Deno.test("basic test, nodeToPath/nodeToPathAsString, directory", async () =>
 	const walker = new Walker()
 	await walker.init(dir,
 	{
-		sort : true,
-		
 		onDirectoryNodeEnter (node)
 		{
 			nodes.push(node)
 		}
+	},
+	{
+		sort : true
 	})
 
 	const directoryNode = nodes[1]
@@ -164,12 +165,13 @@ Deno.test("basic test, nodeToPath/nodeToPathAsString, file", async () =>
 	const walker = new Walker()
 	await walker.init(dir,
 	{
-		sort : true,
-		
 		onFileNodeEnter (node)
 		{
 			nodes.push(node)
 		}
+	},
+	{
+		sort : true
 	})
 
 	const fileNode = nodes[0]
@@ -188,8 +190,6 @@ Deno.test("basic test, with sorting, on enter", async () =>
 	const walker = new Walker()
 	await walker.init(dir,
 	{
-		sort : true,
-		
 		onDirectoryNodeEnter (node)
 		{
 			const filepath = walker.nodeToPathAsString(node, { absolute : false })
@@ -201,6 +201,9 @@ Deno.test("basic test, with sorting, on enter", async () =>
 			const filepath = walker.nodeToPathAsString(node, { absolute : false })
 			output.push(filepath)
 		}
+	},
+	{
+		sort : true
 	})
 
 	const expected =
@@ -226,8 +229,6 @@ Deno.test("basic test, with sorting, on leave", async () =>
 	const walker = new Walker()
 	await walker.init(dir,
 	{
-		sort : true,
-		
 		onDirectoryNodeLeave (node)
 		{
 			const filepath = walker.nodeToPathAsString(node, { absolute : false })
@@ -239,6 +240,9 @@ Deno.test("basic test, with sorting, on leave", async () =>
 			const filepath = walker.nodeToPathAsString(node, { absolute : false })
 			output.push(filepath)
 		}
+	},
+	{
+		sort : true
 	})
 
 	const expected =
@@ -264,14 +268,14 @@ Deno.test("helper, isInsideDirectory", async () =>
 	const walker = new Walker()
 	await walker.init(dir,
 	{
-		
-		sort : true,
-		
 		onFileNodeEnter (node)
 		{
 			const isInsideModuleA = walker.isInsideDirectory(node, [ 'ModuleA' ])
 			output.push({ name : node.name, isInsideModuleA })
 		}
+	},
+	{
+		sort : true
 	})
 
 	const expected =
@@ -331,7 +335,6 @@ Deno.test("loaders, default loaders (txt, json)", async () =>
 	const walker = new Walker<JsonPayload|TextPayload>()
 	await walker.init(dir,
 	{
-		
 		handlers :
 		{
 			"" : { loader : defaultTextLoader },
@@ -397,7 +400,6 @@ Deno.test("loaders, default loaders (js, es modules)", async () =>
 	const walker = new Walker<JavascriptPayload>()
 	await walker.init(dir,
 	{
-		
 		handlers :
 		{
 			".js" :
@@ -466,17 +468,17 @@ Deno.test("loaders, default loaders (js, es modules but with wrong options)", ()
 	assertRejects( async () =>
 	{
 		await walker.init(dir,
+		{
+			
+			handlers :
 			{
-				
-				handlers :
+				".js" :
 				{
-					".js" :
-					{
-						loader : defaultJavascriptLoader,
-						options : { sourceType : "commonjs" },  // With sourceType : "commonjs" Espree cannot parse import/export statements
-					}
+					loader : defaultJavascriptLoader,
+					options : { sourceType : "commonjs" },  // With sourceType : "commonjs" Espree cannot parse import/export statements
 				}
-			})
+			}
+		})
 	})
 });
 
