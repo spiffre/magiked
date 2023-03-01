@@ -1,13 +1,18 @@
 
 # Todo
 
-- EXTRACT JS loader to a seperate package `@spiffre/magiked-espree-loader`
+- SPLIT options and hooks into 2 objects
+
+- REFACTOR onDirectoryNodeLeave() and co so they take a DirectoryNode|FileNode, but also the walker itself
+  That way, we don't rely on scope knowledge of walker
 
 - ADD a glob matcher
   https://github.com/devongovett/glob-match
   https://www.npmjs.com/package/micromatch
     See: https://codesandbox.io/s/micromatch-sample-o7662m
     See: https://esm.sh/v109/micromatch@4.0.5/es2022/micromatch.js ?
+
+- EXTRACT JS loader to a seperate package `@spiffre/magiked-espree-loader`
 
 - ADD SORT as readdir doesn't guarantee an order (such as subdirectories then files)
   We should expose a `sort()` option which lets the caller customize the sort order: they may want:
@@ -16,8 +21,10 @@
   - Regular alphanumerical sort
   - etc
 
-- MAYBE we need a `walker.remove(node: FileNode|DirectoryNode, from: DirectoryNode)` util
-  Which woule handle removing entry from .files or .directories and update the relevant count
+- ADD helpers attached to walker to manipulate the nodes
+  Think `removeFile()` and `removeDirectory()`, and maybe also `addFile()` and `addDirectory()` ?
+  Maybe it's `walker.api.removeFile()` and not `walker.removeFile()`
+  It would add/remove entry from .files or .directories and update the relevant count
 
 - MAYBE prepend paths returned by `normalizePath()` ?
    - They are expressed as paths relative to `Walker.rootPathAsString()` so it makes sense
