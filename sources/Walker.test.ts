@@ -1,7 +1,7 @@
 import { assert, assertArrayIncludes, assertEquals, assertExists, assertNotEquals, assertRejects, assertStrictEquals } from "https://deno.land/std@0.182.0/testing/asserts.ts";
 import * as path from "https://deno.land/std@0.182.0/path/mod.ts"
 
-import { Walker, defaultJsonLoader, defaultTextLoader, defaultJavascriptLoader } from "./Walker.ts"
+import { Walker, NodeKind, defaultJsonLoader, defaultTextLoader, defaultJavascriptLoader } from "./Walker.ts"
 import type { DirectoryNode, FileNode, JsonPayload, TextPayload, JavascriptPayload } from "./Walker.ts"
 
 const DATA_BASE_PATH = "tests/data"
@@ -542,4 +542,44 @@ Deno.test("loaders, default loaders (js, cjs modules)", async () =>
 		assert(first.declarations[0].init.callee.type == "Identifier")
 		assert(first.declarations[0].init.callee.name == "require")
 	}
+});
+
+Deno.test("loaders, filter via function", async () =>
+{
+	const dir = path.resolve(DATA_BASE_PATH, "filters")
+	const files: string[] = []
+
+	const walker = new Walker<JsonPayload|TextPayload>()
+	await walker.init(dir,
+	{
+		handlers :
+		{
+			".txt" : { loader : defaultTextLoader },
+		}
+	},
+	{
+		filter : (name: string, fullpath: string, kind: NodeKind) =>
+		{
+			// Exclude directories
+			if (kind != NodeKind.FILE)
+			{
+				return false
+			}
+			
+			// Get the name of the directory containing the file
+			const dirname = path.basename( path.dirname(fullpath) )
+			
+			// Exclude files inside the /logs/ directory
+			if (dirname != "logs")
+			{
+				files.push(name)
+				return true
+			}
+			
+			return false
+		}
+	})
+
+	assertArrayIncludes(files, [ "one.txt", "two.txt" ])
+	assert(files.length == 2)
 });

@@ -53,7 +53,7 @@ type WalkerHooks<T extends Payload> = WalkerTraversalOptions<T> &
 type WalkerOptions<T extends Payload> =
 {
 	sort?: boolean
-	filter?: (name: string, fullpath: string) => boolean
+	filter?: (name: string, fullpath: string, kind: NodeKind) => boolean
 }
 
 interface WalkerTraversalOptions<T extends Payload>
@@ -66,6 +66,7 @@ interface WalkerTraversalOptions<T extends Payload>
 }
 
 export type { FileNode, DirectoryNode, Payload }
+export { NodeKind }
 
 
 export class Walker<T extends Payload>
@@ -175,7 +176,7 @@ export class Walker<T extends Payload>
 			if (stats.isDirectory)
 			{
 				const include = typeof this.options.filter == "function"
-									? this.options.filter?.(fileOrDirectory.name, entryFullpath)
+									? this.options.filter?.(fileOrDirectory.name, entryFullpath, NodeKind.DIRECTORY)
 									: true
 				
 				if (include)
@@ -193,7 +194,7 @@ export class Walker<T extends Payload>
 			else if (stats.isFile)
 			{
 				const include = typeof this.options.filter == "function"
-									? this.options.filter?.(fileOrDirectory.name, entryFullpath)
+									? this.options.filter?.(fileOrDirectory.name, entryFullpath, NodeKind.FILE)
 									: true
 				
 				if (include)
