@@ -583,3 +583,29 @@ Deno.test("loaders, filter via function", async () =>
 	assertArrayIncludes(files, [ "one.txt", "two.txt" ])
 	assert(files.length == 2)
 });
+
+Deno.test("loaders, filter via glob", async () =>
+{
+	const dir = path.resolve(DATA_BASE_PATH, "filters")
+	const files: string[] = []
+
+	const walker = new Walker<JsonPayload|TextPayload>()
+	await walker.init(dir,
+	{
+		handlers :
+		{
+			".txt" : { loader : defaultTextLoader },
+		},
+		
+		onFileNodeEnter (node)
+		{
+			files.push(node.name)
+		}
+	},
+	{
+		filter : "!**/logs/**/*.*"
+	})
+
+	assertArrayIncludes(files, [ "one.txt", "two.txt" ])
+	assert(files.length == 2)
+});
