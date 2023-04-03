@@ -1,5 +1,5 @@
-import * as path from "https://deno.land/std@0.156.0/path/mod.ts"
-import { assert } from "https://deno.land/std@0.156.0/testing/asserts.ts";
+import * as path from "https://deno.land/std@0.182.0/path/mod.ts"
+import { assert } from "https://deno.land/std@0.182.0/testing/asserts.ts";
 
 import { espree } from "../dependencies/espree@9.4.0/mod.ts";
 import type { EspreeParseOptions, EspreeAst } from "../dependencies/espree@9.4.0/mod.ts";

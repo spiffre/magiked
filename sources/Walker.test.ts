@@ -1,5 +1,5 @@
-import { assert, assertArrayIncludes, assertEquals, assertExists, assertNotEquals, assertRejects, assertStrictEquals } from "https://deno.land/std@0.156.0/testing/asserts.ts";
-import * as path from "https://deno.land/std@0.156.0/path/mod.ts"
+import { assert, assertArrayIncludes, assertEquals, assertExists, assertNotEquals, assertRejects, assertStrictEquals } from "https://deno.land/std@0.182.0/testing/asserts.ts";
+import * as path from "https://deno.land/std@0.182.0/path/mod.ts"
 
 import { Walker, defaultJsonLoader, defaultTextLoader, defaultJavascriptLoader } from "./Walker.ts"
 import type { DirectoryNode, FileNode, JsonPayload, TextPayload, JavascriptPayload } from "./Walker.ts"
