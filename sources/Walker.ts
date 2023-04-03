@@ -4,6 +4,8 @@ import { assert } from "https://deno.land/std@0.182.0/testing/asserts.ts";
 import { espree } from "../dependencies/espree@9.4.0/mod.ts";
 import type { EspreeParseOptions, EspreeAst } from "../dependencies/espree@9.4.0/mod.ts";
 
+import micromatch from "https://esm.sh/micromatch@4.0.5"
+
 import { NodeKind } from "./Graph.ts"
 import type { DirectoryNode, FileNode, Payload } from "./Graph.ts"
 
@@ -21,6 +23,8 @@ const ESPREE_PARSE_OPTIONS: EspreeParseOptions =
 	ecmaVersion : 11,
 	sourceType: "module",
 }
+
+type FilterFunction = (name: string, fullpath: string, kind: NodeKind) => boolean
 
 type Json =
   | string
@@ -53,7 +57,7 @@ type WalkerHooks<T extends Payload> = WalkerTraversalOptions<T> &
 type WalkerOptions<T extends Payload> =
 {
 	sort?: boolean
-	filter?: (name: string, fullpath: string, kind: NodeKind) => boolean
+	filter?: FilterFunction | string  // A glob pattern
 }
 
 interface WalkerTraversalOptions<T extends Payload>
@@ -175,9 +179,16 @@ export class Walker<T extends Payload>
 			
 			if (stats.isDirectory)
 			{
-				const include = typeof this.options.filter == "function"
-									? this.options.filter?.(fileOrDirectory.name, entryFullpath, NodeKind.DIRECTORY)
-									: true
+				let include = true
+				
+				if (typeof this.options.filter == "function")
+				{
+					include = this.options.filter(fileOrDirectory.name, entryFullpath, NodeKind.DIRECTORY)
+				}
+				else if (typeof this.options.filter == "string")  // A glob pattern
+				{
+					include = micromatch.isMatch(entryFullpath, this.options.filter)
+				}
 				
 				if (include)
 				{
@@ -193,9 +204,16 @@ export class Walker<T extends Payload>
 			}
 			else if (stats.isFile)
 			{
-				const include = typeof this.options.filter == "function"
-									? this.options.filter?.(fileOrDirectory.name, entryFullpath, NodeKind.FILE)
-									: true
+				let include = true
+				
+				if (typeof this.options.filter == "function")
+				{
+					include = this.options.filter(fileOrDirectory.name, entryFullpath, NodeKind.FILE)
+				}
+				else if (typeof this.options.filter == "string")  // A glob pattern
+				{
+					include = micromatch.isMatch(entryFullpath, this.options.filter)
+				}
 				
 				if (include)
 				{

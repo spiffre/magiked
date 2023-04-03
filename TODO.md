@@ -1,12 +1,6 @@
 
 # Todo
 
-- ADD a glob matcher
-  https://github.com/devongovett/glob-match
-  https://www.npmjs.com/package/micromatch
-    See: https://codesandbox.io/s/micromatch-sample-o7662m
-    See: https://esm.sh/v109/micromatch@4.0.5/es2022/micromatch.js ?
-
 - EXTRACT JS loader to a seperate package `@spiffre/magiked-espree-loader`
 
 - ADD SORT as readdir doesn't guarantee an order (such as subdirectories then files)
