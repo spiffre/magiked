@@ -58,11 +58,11 @@ type WalkerOptions<T extends Payload> =
 
 interface WalkerTraversalOptions<T extends Payload>
 {
-	onFileNodeEnter?: (node: FileNode<T>) => void
-	onDirectoryNodeEnter?: (node: DirectoryNode<T>) => void
+	onFileNodeEnter?: (node: FileNode<T>, walker: Walker<T>) => void
+	onDirectoryNodeEnter?: (node: DirectoryNode<T>, walker: Walker<T>) => void
 
-	onFileNodeLeave?: (node: FileNode<T>) => void
-	onDirectoryNodeLeave?: (node: DirectoryNode<T>) => void
+	onFileNodeLeave?: (node: FileNode<T>, walker: Walker<T>) => void
+	onDirectoryNodeLeave?: (node: DirectoryNode<T>, walker: Walker<T>) => void
 }
 
 export type { FileNode, DirectoryNode, Payload }
@@ -143,7 +143,7 @@ export class Walker<T extends Payload>
 		}
 		
 		// Call the onDirectoryNodeEnter callback, if provided
-		this.hooks.onDirectoryNodeEnter?.(dirNode)
+		this.hooks.onDirectoryNodeEnter?.(dirNode, this)
 		
 		// Read the directory's content
 		const entries: Deno.DirEntry[] = []
@@ -215,7 +215,7 @@ export class Walker<T extends Payload>
 		}
 		
 		// Call the onDirectoryNodeLeave callback, if provided
-		this.hooks.onDirectoryNodeLeave?.(dirNode)
+		this.hooks.onDirectoryNodeLeave?.(dirNode, this)
 		
 		return dirNode
 	}
@@ -232,7 +232,7 @@ export class Walker<T extends Payload>
 		}
 		
 		// Call the onFileNodeEnter callback, if provided
-		this.hooks.onFileNodeEnter?.(fileNode)
+		this.hooks.onFileNodeEnter?.(fileNode, this)
 
 		// If a handler is provided, use it to load the file's content and process it
 		const extension = path.extname(name)
@@ -248,7 +248,7 @@ export class Walker<T extends Payload>
 		}
 		
 		// Call the onFileNodeLeave callback, if provided
-		this.hooks.onFileNodeLeave?.(fileNode)
+		this.hooks.onFileNodeLeave?.(fileNode, this)
 		
 		return fileNode
 	}
@@ -257,7 +257,7 @@ export class Walker<T extends Payload>
 	
 	async traverse (options: WalkerTraversalOptions<T>)
 	{
-		async function traverse (directory: DirectoryNode<T>)
+		const traverse = async (directory: DirectoryNode<T>) =>
 		{
 			// Pre callback for files
 			if (typeof options.onFileNodeEnter == 'function')
@@ -268,7 +268,7 @@ export class Walker<T extends Payload>
 					// When we iterate over `files` we know nothing's `undefined`
 					assert(file)
 					
-					await options.onFileNodeEnter(file)
+					await options.onFileNodeEnter(file, this)
 				}
 			}
 			
@@ -281,7 +281,7 @@ export class Walker<T extends Payload>
 					// When we iterate over `directories` we know nothing's `undefined`
 					assert(subdirectory)
 					
-					await options.onDirectoryNodeEnter(subdirectory)
+					await options.onDirectoryNodeEnter(subdirectory, this)
 				}
 			}
 			
@@ -303,7 +303,7 @@ export class Walker<T extends Payload>
 					// When we iterate over `file` we know nothing's `undefined`
 					assert(file)
 				
-					await options.onFileNodeLeave(file)
+					await options.onFileNodeLeave(file, this)
 				}
 			}
 			
@@ -316,7 +316,7 @@ export class Walker<T extends Payload>
 					// When we iterate over `directories` we know nothing's `undefined`
 					assert(subdirectory)
 				
-					await options.onDirectoryNodeLeave(subdirectory)
+					await options.onDirectoryNodeLeave(subdirectory, this)
 				}
 			}
 		}

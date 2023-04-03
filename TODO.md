@@ -1,9 +1,6 @@
 
 # Todo
 
-- REFACTOR onDirectoryNodeLeave() and co so they take a DirectoryNode|FileNode, but also the walker itself
-  That way, we don't rely on scope knowledge of walker
-
 - ADD a glob matcher
   https://github.com/devongovett/glob-match
   https://www.npmjs.com/package/micromatch
