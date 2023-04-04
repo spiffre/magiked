@@ -5,8 +5,7 @@
 		{
 			"include":
 			[
-				"sources/",
-				"dependencies/"
+				"sources/"
 			]
 		},
 		

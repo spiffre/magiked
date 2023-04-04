@@ -1,8 +1,6 @@
 
 # Todo
 
-- EXTRACT JS loader to a seperate package `@spiffre/magiked-espree-loader`
-
 - ADD SORT as readdir doesn't guarantee an order (such as subdirectories then files)
   We should expose a `sort()` option which lets the caller customize the sort order: they may want:
   - All directories first

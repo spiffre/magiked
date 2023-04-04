@@ -158,6 +158,13 @@
     "https://deno.land/std@0.182.0/testing/_diff.ts": "1a3c044aedf77647d6cac86b798c6417603361b66b54c53331b312caeb447aea",
     "https://deno.land/std@0.182.0/testing/_format.ts": "a69126e8a469009adf4cf2a50af889aca364c349797e63174884a52ff75cf4c7",
     "https://deno.land/std@0.182.0/testing/asserts.ts": "e16d98b4d73ffc4ed498d717307a12500ae4f2cbe668f1a215632d19fcffc22f",
+    "https://deno.land/x/magiked@v0.5.0/dependencies/eslint-visitor-keys@3.3.0/mod.js": "387ac908213bd8977b75557d1588bbe821a85d20186859c3396a25ff19ed4c50",
+    "https://deno.land/x/magiked@v0.5.0/dependencies/espree@9.4.0/ast.ts": "7d6ec5a2b671761ed84591abf62df69be5f698ad906dba432ebefb6a36588ceb",
+    "https://deno.land/x/magiked@v0.5.0/dependencies/espree@9.4.0/espree-and-evk.js": "c5167f48a13ad7942b11d61c9c69dc7628339b4eb0e0101fce8b879c1a0ba29e",
+    "https://deno.land/x/magiked@v0.5.0/dependencies/espree@9.4.0/mod.ts": "9bd39226ee67009a63592e44baee9dcd837155da1677efcd10daa07208f0af08",
+    "https://deno.land/x/magiked@v0.5.0/mod.ts": "21bb6e2b28e4c027dd7daccfb5f36c8c7fa53aa158d8a60d86bf2fa9e0330bbe",
+    "https://deno.land/x/magiked@v0.5.0/sources/Graph.ts": "afdce9535ee1680a4f85c49fee71028f332632b57ee71fc8604f6e95335387af",
+    "https://deno.land/x/magiked@v0.5.0/sources/Walker.ts": "a2ee53bc6e9ffaf7f7b240e70f0af481d4399e21102f081fed54645807d500e9",
     "https://esm.sh/micromatch@4.0.5": "cd0a4a424ce189d09e3d0ef300a1402acfbc14fa4ca07d1015ab316e33cccf1a",
     "https://esm.sh/v113/@types/braces@3.0.1/index.d.ts": "40304c033bb6e39f0eb01b106d29523950148dfc3cd547ddb500167871171281",
     "https://esm.sh/v113/@types/micromatch@4.0.2/index.d.ts": "9c804c7ae29cac1f950dae835a4eb153bdfe11f2b02c64fd1fb43397a7eb4256",
@@ -170,10 +177,6 @@
     "https://esm.sh/v113/picomatch@2.3.1/deno/picomatch.mjs": "938de5adba21a3e38229829b72d503b9ca2d667c80cf4d88dafcf5c6401bd79c",
     "https://esm.sh/v113/to-regex-range@5.0.1/deno/to-regex-range.mjs": "7ed054f1b7e214ba1052f0b95badb18ed0bce9766827eaa0707b87d4de9fa742",
     "https://esm.sh/v94/acorn-jsx@5.3.2/es2022/acorn-jsx.js": "32795fba0a2580db654432f7adfc257b542f26926ddef05aff9041344c546b51",
-    "https://esm.sh/v94/acorn@8.8.0/es2022/acorn.js": "65c8c03d55c023dea54401a468204db8b588a31ddbd04d9db07b4432330978f5",
-    "https://raw.githubusercontent.com/spiffre/magiked/v0.3.1/dependencies/eslint-visitor-keys@3.3.0/mod.js": "387ac908213bd8977b75557d1588bbe821a85d20186859c3396a25ff19ed4c50",
-    "https://raw.githubusercontent.com/spiffre/magiked/v0.3.1/dependencies/espree%409.4.0/ast.d.ts": "7d6ec5a2b671761ed84591abf62df69be5f698ad906dba432ebefb6a36588ceb",
-    "https://raw.githubusercontent.com/spiffre/magiked/v0.3.1/dependencies/espree%409.4.0/espree+evk.js": "c5167f48a13ad7942b11d61c9c69dc7628339b4eb0e0101fce8b879c1a0ba29e",
-    "https://raw.githubusercontent.com/spiffre/magiked/v0.3.1/dependencies/espree%409.4.0/mod.ts": "60614d8f01e2bdfed94a5eb128260047b9b734e5b508ed91173eccd56cd4c775"
+    "https://esm.sh/v94/acorn@8.8.0/es2022/acorn.js": "65c8c03d55c023dea54401a468204db8b588a31ddbd04d9db07b4432330978f5"
   }
 }
