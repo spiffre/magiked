@@ -33,10 +33,10 @@ Deno.test("basic test, no sorting", async () =>
 		"",  // The walker's root directory
 		"ModuleA",
 		"ModuleB",
-		"ModuleA/file1.js",
-		"ModuleA/file2.js",
-		"ModuleB/file3.js",
-		"ModuleB/file4.js",
+		"ModuleA/file1.txt",
+		"ModuleA/file2.txt",
+		"ModuleB/file3.txt",
+		"ModuleB/file4.txt",
 	]
 	
 	// Compare without any expectation regarding the order inside `output`
@@ -88,14 +88,14 @@ Deno.test("basic test, pathToNode/pathAsStringToNode, file", async () =>
 	const walker = new Walker()
 	await walker.init(dir)
 
-	const node = walker.pathToNode([ "ModuleA", "file1.js" ])
-	const node2 = walker.pathAsStringToNode("ModuleA/file1.js")
+	const node = walker.pathToNode([ "ModuleA", "file1.txt" ])
+	const node2 = walker.pathAsStringToNode("ModuleA/file1.txt")
 	
 	assertNotEquals(node, undefined)
 	assertStrictEquals(node, node2)
 	
 	assertEquals(node?.kind, "FILE")
-	assertEquals(node?.name, "file1.js")
+	assertEquals(node?.name, "file1.txt")
 });
 
 Deno.test("basic test, pathToNode/pathAsStringToNode, file, absolute", async () =>
@@ -105,7 +105,7 @@ Deno.test("basic test, pathToNode/pathAsStringToNode, file, absolute", async () 
 	const walker = new Walker()
 	await walker.init(dir)
 
-	const absolutePath = path.resolve(dir, "ModuleA", "file1.js")
+	const absolutePath = path.resolve(dir, "ModuleA", "file1.txt")
 	const absolutePathAsParts = absolutePath.split(path.sep).slice(1)
 	
 	const node = walker.pathToNode(absolutePathAsParts)
@@ -115,7 +115,7 @@ Deno.test("basic test, pathToNode/pathAsStringToNode, file, absolute", async () 
 	assertStrictEquals(node, node2)
 	
 	assertEquals(node?.kind, "FILE")
-	assertEquals(node?.name, "file1.js")
+	assertEquals(node?.name, "file1.txt")
 });
 
 Deno.test("basic test, pathToNode/pathAsStringToNode, file, not found", async () =>
@@ -125,8 +125,8 @@ Deno.test("basic test, pathToNode/pathAsStringToNode, file, not found", async ()
 	const walker = new Walker()
 	await walker.init(dir)
 
-	const node = walker.pathToNode([ "ModuleC", "file7.js" ])
-	const node2 = walker.pathAsStringToNode("ModuleC/file7.js")
+	const node = walker.pathToNode([ "ModuleC", "file7.txt" ])
+	const node2 = walker.pathAsStringToNode("ModuleC/file7.txt")
 	
 	assertEquals(node, undefined)
 	assertStrictEquals(node, node2)
@@ -178,8 +178,8 @@ Deno.test("basic test, nodeToPath/nodeToPathAsString, file", async () =>
 	const filePathAsString = walker.nodeToPathAsString(fileNode, { absolute : false })
 	const filePathAsParts = walker.nodeToPath(fileNode, { absolute : false })
 	
-	assertEquals(filePathAsString, "ModuleA/file1.js")
-	assertEquals(filePathAsParts, [ "ModuleA", "file1.js" ])
+	assertEquals(filePathAsString, "ModuleA/file1.txt")
+	assertEquals(filePathAsParts, [ "ModuleA", "file1.txt" ])
 });
 
 Deno.test("basic test, with sorting, on enter", async () =>
@@ -210,11 +210,11 @@ Deno.test("basic test, with sorting, on enter", async () =>
 	[
 		"",  // The walker's root directory
 		"ModuleA",
-		"ModuleA/file1.js",
-		"ModuleA/file2.js",
+		"ModuleA/file1.txt",
+		"ModuleA/file2.txt",
 		"ModuleB",
-		"ModuleB/file3.js",
-		"ModuleB/file4.js",
+		"ModuleB/file3.txt",
+		"ModuleB/file4.txt",
 	]
 	
 	// Compare with the expectation that the order is correct
@@ -247,11 +247,11 @@ Deno.test("basic test, with sorting, on leave", async () =>
 
 	const expected =
 	[
-		"ModuleA/file1.js",
-		"ModuleA/file2.js",
+		"ModuleA/file1.txt",
+		"ModuleA/file2.txt",
 		"ModuleA",
-		"ModuleB/file3.js",
-		"ModuleB/file4.js",
+		"ModuleB/file3.txt",
+		"ModuleB/file4.txt",
 		"ModuleB",
 		"",  // The walker's root directory
 	]
@@ -280,10 +280,10 @@ Deno.test("helper, isInsideDirectory", async () =>
 
 	const expected =
 	[
-		{ name : "file1.js", isInsideModuleA : true },
-		{ name : "file2.js", isInsideModuleA : true },
-		{ name : "file3.js", isInsideModuleA : false },
-		{ name : "file4.js", isInsideModuleA : false },
+		{ name : "file1.txt", isInsideModuleA : true },
+		{ name : "file2.txt", isInsideModuleA : true },
+		{ name : "file3.txt", isInsideModuleA : false },
+		{ name : "file4.txt", isInsideModuleA : false },
 	]
 	
 	// Compare with the expectation that the order is correct
