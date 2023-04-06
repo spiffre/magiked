@@ -9,7 +9,7 @@
 			"name": "Debug Test",
 			"type": "node",
 			"cwd": "${workspaceFolder}",
-			"runtimeExecutable": "/opt/homebrew/bin/deno",
+			"runtimeExecutable": "deno",
 			"runtimeArgs": [
 				"test",
 				"--inspect-brk=127.0.0.1:9231",
