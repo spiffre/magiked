@@ -1,14 +1,13 @@
 
-export type { NodeKind } from "./sources/Graph.ts"
-
 export
 {
 	Walker,
 	type FileNode,
 	type DirectoryNode,
-	type Payload
+	type Payload,
+	type NodeKind
 	
-} from "./sources/Walker.ts"
+} from "./sources/magiked.ts"
 
 export
 {
@@ -18,4 +17,4 @@ export
 	type TextPayload,
 	type JsonPayload,
 	
-} from "./sources/Walker.ts"
+} from "./sources/magiked.ts"

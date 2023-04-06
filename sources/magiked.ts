@@ -3,8 +3,49 @@ import { assert } from "https://deno.land/std@0.182.0/testing/asserts.ts";
 
 import micromatch from "https://esm.sh/micromatch@4.0.5"
 
-import { NodeKind } from "./Graph.ts"
-import type { DirectoryNode, FileNode, Payload, FileExtension } from "./Graph.ts"
+
+type ValuesOf<T> = T[keyof T]
+export type FileExtension = `.${string}` | ''
+
+export const NodeKind =
+{
+	UNKNOWN			: 'UNKNOWN',
+	DIRECTORY		: 'DIRECTORY',
+	FILE			: 'FILE',
+} as const
+
+export type NodeKind = ValuesOf<typeof NodeKind>
+
+export interface Payload
+{
+	type: string
+}
+
+interface Node<T extends Payload>
+{
+	kind: NodeKind
+	uid: number
+	name: string
+	parent: DirectoryNode<T>|null
+}
+
+export interface DirectoryNode<T extends Payload = Payload> extends Node<T>
+{
+	kind: "DIRECTORY" // fixme: NodeKind.DIRECTORY type can't be used here...
+	
+	directories: Record<string, DirectoryNode<T>|undefined>
+	files: Record<string, FileNode<T>|undefined>
+	directoryCount: number
+	fileCount: number
+}
+
+export interface FileNode<T extends Payload = Payload> extends Node<T>
+{
+	kind: "FILE" // fixme: NodeKind.DIRECTORY type can't be used here...
+	
+	payload: T|null
+}
+
 
 
 type FilterFunction = (name: string, fullpath: string, kind: NodeKind) => boolean
@@ -31,9 +72,6 @@ interface WalkerTraversalOptions<T extends Payload>
 	onFileNodeLeave?: (node: FileNode<T>, walker: Walker<T>, filepath?: string) => void
 	onDirectoryNodeLeave?: (node: DirectoryNode<T>, walker: Walker<T>, dirpath?: string) => void
 }
-
-export type { FileNode, DirectoryNode, Payload }
-export { NodeKind }
 
 
 export class Walker<T extends Payload>

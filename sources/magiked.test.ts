@@ -1,8 +1,8 @@
 import { assert, assertArrayIncludes, assertEquals, assertNotEquals, assertStrictEquals } from "https://deno.land/std@0.182.0/testing/asserts.ts";
 import * as path from "https://deno.land/std@0.182.0/path/mod.ts"
 
-import { Walker, NodeKind, processorForJson, processorForText } from "./Walker.ts"
-import type { Payload, DirectoryNode, FileNode, JsonPayload, TextPayload } from "./Walker.ts"
+import { Walker, NodeKind, processorForJson, processorForText } from "./magiked.ts"
+import type { Payload, DirectoryNode, FileNode, JsonPayload, TextPayload } from "./magiked.ts"
 
 const DATA_BASE_PATH = "tests/data"
 
