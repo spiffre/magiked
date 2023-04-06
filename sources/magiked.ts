@@ -58,7 +58,7 @@ type Json =
   | { [property: string]: Json }
   | Json[]
 
-type WalkerOptions<T extends Payload> =
+type WalkerOptions =
 {
 	sort?: boolean
 	filter?: FilterFunction | string  // A glob pattern
@@ -83,7 +83,7 @@ export class Walker<T extends Payload>
 	currentFileId: number
 	
 	hooks: WalkerTraversalOptions<T>
-	options: WalkerOptions<T>
+	options: WalkerOptions
 	errors: string[]
 
 
@@ -98,7 +98,7 @@ export class Walker<T extends Payload>
 		this.errors = []
 	}
 	
-	async init (directory: string, hooks: WalkerTraversalOptions<T> = {}, options: WalkerOptions<T> = {}): Promise<void>
+	async init (directory: string, hooks: WalkerTraversalOptions<T> = {}, options: WalkerOptions = {}): Promise<void>
 	{
 		// Ensure the path is absolute and normalized
 		directory = path.resolve(directory)
