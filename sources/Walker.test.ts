@@ -2,7 +2,7 @@ import { assert, assertArrayIncludes, assertEquals, assertNotEquals, assertStric
 import * as path from "https://deno.land/std@0.182.0/path/mod.ts"
 
 import { Walker, NodeKind, processorForJson, processorForText } from "./Walker.ts"
-import type { DirectoryNode, FileNode, JsonPayload, TextPayload } from "./Walker.ts"
+import type { Payload, DirectoryNode, FileNode, JsonPayload, TextPayload } from "./Walker.ts"
 
 const DATA_BASE_PATH = "tests/data"
 
@@ -535,5 +535,74 @@ Deno.test("payloads, initial pass, filter via glob", async () =>
 		
 		// Ensure it has the right content
 		assertEquals(readme.payload.content, '2')
+	}
+});
+
+Deno.test("payloads, 2 passes (txt > number)", async () =>
+{
+	interface LineCountPayload extends Payload
+	{
+		type : 'line-count'
+		lineCount : number
+	}
+
+	const dir = path.resolve(DATA_BASE_PATH, "multi-pass")
+
+	const walker = new Walker<TextPayload|LineCountPayload>()
+	await walker.init(dir,
+	{
+		async onFileNodeEnter (node, _, filepath)
+		{
+			// filepath is provided only on first pass
+			assert(filepath)
+			
+			const content = await Deno.readTextFile(filepath)
+
+			if (Walker.matches.glob(filepath, "**/*.txt"))
+			{
+				node.payload = processorForText(content)
+			}
+		}
+	})
+	
+	await walker.traverse(
+	{
+		onFileNodeEnter (node)
+		{
+			assert(node.payload && node.payload.type == 'text')
+			{
+				node.payload =
+				{
+					type : 'line-count',
+					lineCount : node.payload.content.split(/\r?\n/).length
+				}
+			}
+		}
+	})
+
+	{
+		const config = walker.pathAsStringToNode("one.txt")
+		
+		// Ensure we have a valid JsonPayload
+		assert(config !== undefined)
+		assert(config.kind == "FILE")
+		assert(config.payload !== null)
+		assert(config.payload.type == "line-count")
+		
+		// Ensure it has the right content
+		assert(config.payload.lineCount == 2)
+	}
+	
+	{
+		const config = walker.pathAsStringToNode("two.txt")
+		
+		// Ensure we have a valid JsonPayload
+		assert(config !== undefined)
+		assert(config.kind == "FILE")
+		assert(config.payload !== null)
+		assert(config.payload.type == "line-count")
+		
+		// Ensure it has the right content
+		assert(config.payload.lineCount == 3)
 	}
 });
