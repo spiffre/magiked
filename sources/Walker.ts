@@ -4,15 +4,7 @@ import { assert } from "https://deno.land/std@0.182.0/testing/asserts.ts";
 import micromatch from "https://esm.sh/micromatch@4.0.5"
 
 import { NodeKind } from "./Graph.ts"
-import type { DirectoryNode, FileNode, Payload } from "./Graph.ts"
-
-const
-{
-	readDir : readDirAsync,
-	readTextFile : readTextFileAsync,
-	stat : statAsync,
-	
-} = Deno
+import type { DirectoryNode, FileNode, Payload, FileExtension } from "./Graph.ts"
 
 
 type FilterFunction = (name: string, fullpath: string, kind: NodeKind) => boolean
@@ -25,26 +17,6 @@ type Json =
   | { [property: string]: Json }
   | Json[]
 
-type HandlerOptions = Record<string, unknown>
-
-interface Handler<T>
-{
-	loader: (filepath: string, options?: HandlerOptions) => Promise<T>
-	options?: HandlerOptions | (() => HandlerOptions)
-}
-
-type HandlerMapping<T extends Payload> =
-{
-	// fixme: this syntax is utterly incomprehensible
-	// Check that U is a type present in T, then get T.extension -- although that's not usually what `as` means in TS...
-	[U in T as T['extension']]?: Handler<T>
-};
-
-type WalkerHooks<T extends Payload> = WalkerTraversalOptions<T> &
-{
-	handlers?: HandlerMapping<T>
-}
-
 type WalkerOptions<T extends Payload> =
 {
 	sort?: boolean
@@ -53,11 +25,11 @@ type WalkerOptions<T extends Payload> =
 
 interface WalkerTraversalOptions<T extends Payload>
 {
-	onFileNodeEnter?: (node: FileNode<T>, walker: Walker<T>) => void
-	onDirectoryNodeEnter?: (node: DirectoryNode<T>, walker: Walker<T>) => void
+	onFileNodeEnter?: (node: FileNode<T>, walker: Walker<T>, filepath?: string) => void
+	onDirectoryNodeEnter?: (node: DirectoryNode<T>, walker: Walker<T>, dirpath?: string) => void
 
-	onFileNodeLeave?: (node: FileNode<T>, walker: Walker<T>) => void
-	onDirectoryNodeLeave?: (node: DirectoryNode<T>, walker: Walker<T>) => void
+	onFileNodeLeave?: (node: FileNode<T>, walker: Walker<T>, filepath?: string) => void
+	onDirectoryNodeLeave?: (node: DirectoryNode<T>, walker: Walker<T>, dirpath?: string) => void
 }
 
 export type { FileNode, DirectoryNode, Payload }
@@ -72,11 +44,10 @@ export class Walker<T extends Payload>
 	
 	currentFileId: number
 	
-	hooks: WalkerHooks<T>
+	hooks: WalkerTraversalOptions<T>
 	options: WalkerOptions<T>
 	errors: string[]
-	
-	private handlers: Map<string, Handler<T>>
+
 
 	constructor ()
 	{
@@ -87,10 +58,9 @@ export class Walker<T extends Payload>
 		this.hooks = {}
 		this.options = {}
 		this.errors = []
-		this.handlers = new Map()
 	}
 	
-	async init (directory: string, hooks: WalkerHooks<T> = {}, options: WalkerOptions<T> = {}): Promise<void>
+	async init (directory: string, hooks: WalkerTraversalOptions<T> = {}, options: WalkerOptions<T> = {}): Promise<void>
 	{
 		// Ensure the path is absolute and normalized
 		directory = path.resolve(directory)
@@ -101,19 +71,6 @@ export class Walker<T extends Payload>
 		this.options = options
 		this.rootPathAsString = directory
 		this.rootPath = directory.split( path.sep ).slice(1)
-		
-		// If in-init handlers are provided, initialize a Record<file extension, handler> mapping
-		if (this.hooks.handlers != undefined)
-		{
-			const extensions = Object.keys(this.hooks.handlers)
-			const handlers = this.hooks.handlers as Record<string, Handler<T>>
-			
-			for (const extension of extensions)
-			{
-				const handler = handlers[extension]
-				this.handlers.set(extension, handler)
-			}
-		}
 		
 		// Perform the initial walk
 		this.root = await this.readDir(name, directory)
@@ -139,11 +96,11 @@ export class Walker<T extends Payload>
 		}
 		
 		// Call the onDirectoryNodeEnter callback, if provided
-		this.hooks.onDirectoryNodeEnter?.(dirNode, this)
+		await this.hooks.onDirectoryNodeEnter?.(dirNode, this, dirpath)
 		
 		// Read the directory's content
 		const entries: Deno.DirEntry[] = []
-		for await (const fileOrDirectory of await readDirAsync(dirpath))
+		for await (const fileOrDirectory of await Deno.readDir(dirpath))
 		{
 			entries.push(fileOrDirectory)
 		}
@@ -166,7 +123,7 @@ export class Walker<T extends Payload>
 			}
 			
 			const entryFullpath = path.resolve(dirpath, fileOrDirectory.name)
-			const stats = await statAsync(entryFullpath)
+			const stats = await Deno.stat(entryFullpath)
 			
 			if (stats.isDirectory)
 			{
@@ -225,7 +182,7 @@ export class Walker<T extends Payload>
 		}
 		
 		// Call the onDirectoryNodeLeave callback, if provided
-		this.hooks.onDirectoryNodeLeave?.(dirNode, this)
+		await this.hooks.onDirectoryNodeLeave?.(dirNode, this, dirpath)
 		
 		return dirNode
 	}
@@ -242,23 +199,10 @@ export class Walker<T extends Payload>
 		}
 		
 		// Call the onFileNodeEnter callback, if provided
-		this.hooks.onFileNodeEnter?.(fileNode, this)
-
-		// If a handler is provided, use it to load the file's content and process it
-		const extension = path.extname(name)
-		const handler = this.handlers.get(extension)
-		if (handler)
-		{
-			const { loader, options : loaderOptions } = handler
-			const options = loaderOptions
-								? typeof loaderOptions == "function" ? loaderOptions() : loaderOptions
-								: undefined
-			
-			fileNode.payload = await loader(filepath, options)
-		}
+		await this.hooks.onFileNodeEnter?.(fileNode, this, filepath)
 		
 		// Call the onFileNodeLeave callback, if provided
-		this.hooks.onFileNodeLeave?.(fileNode, this)
+		await this.hooks.onFileNodeLeave?.(fileNode, this, filepath)
 		
 		return fileNode
 	}
@@ -516,46 +460,67 @@ export class Walker<T extends Payload>
 		// No match was found
 		return false
 	}
+	
+	static matches =
+	{
+		glob (location: string, pattern: string): boolean
+		{
+			return micromatch.isMatch(location, pattern)
+		},
+		
+		globs (location: string, pattern: string[]): boolean
+		{
+			return micromatch.isMatch(location, pattern)
+		},
+		
+		regex (location: string, regex: RegExp): boolean
+		{
+			return regex.test(location)
+		},
+		
+		extension (location: string, extension: FileExtension): boolean
+		{
+			return path.extname(location) == extension
+		},
+		
+		extensions (location: string, extensions: FileExtension[]): boolean
+		{
+			return extensions.find( (ext) => path.extname(location) == ext ) != undefined
+		},
+		
+		test (location: string, test: (loc: string) => boolean): boolean
+		{
+			return test(location)
+		}
+	}
 }
 
 
 export interface TextPayload extends Payload
 {
-  // fixme: How to force type and extension to be re-defined ?
-  type : 'text'
-  extension : '.txt' | ''
-
+  type : 'text'  // fixme: How to force type to be re-defined
   content : string
 }
 
-export async function defaultTextLoader (filepath: string): Promise<TextPayload>
+export function processorForText (content: string): TextPayload
 {
-	const content = await readTextFileAsync(filepath)
-
 	return {
 		type : 'text',
-		extension : '.txt',
 		content
 	}
 }
 
+
 export interface JsonPayload extends Payload
 {
-	// fixme: How to force type and extension to be re-defined ?
-	type: 'json'
-	extension: '.json'
-
+	type: 'json'  // fixme: How to force type to be re-defined
 	object: Json
 }
 
-export async function defaultJsonLoader (filepath: string): Promise<JsonPayload>
+export function processorForJson (content: string): JsonPayload
 {
-	const content = await readTextFileAsync(filepath)
-	const object = JSON.parse(content)
-
 	return {
 		type : 'json',
-		extension : '.json',
-		object
+		object : JSON.parse(content)
 	}
 }

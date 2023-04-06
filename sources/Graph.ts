@@ -1,6 +1,6 @@
 
 type ValuesOf<T> = T[keyof T]
-type FileExtension = `.${string}` | ''
+export type FileExtension = `.${string}` | ''
 
 export const NodeKind =
 {
@@ -14,7 +14,6 @@ export type NodeKind = ValuesOf<typeof NodeKind>
 export interface Payload
 {
 	type: string
-	extension: FileExtension
 }
 
 interface Node<T extends Payload>

@@ -1,7 +1,7 @@
 import { assert, assertArrayIncludes, assertEquals, assertNotEquals, assertStrictEquals } from "https://deno.land/std@0.182.0/testing/asserts.ts";
 import * as path from "https://deno.land/std@0.182.0/path/mod.ts"
 
-import { Walker, NodeKind, defaultJsonLoader, defaultTextLoader } from "./Walker.ts"
+import { Walker, NodeKind, processorForJson, processorForText } from "./Walker.ts"
 import type { DirectoryNode, FileNode, JsonPayload, TextPayload } from "./Walker.ts"
 
 const DATA_BASE_PATH = "tests/data"
@@ -297,7 +297,7 @@ Deno.test("loaders, no loaders", async () =>
 	const walker = new Walker<JsonPayload|TextPayload>()
 	await walker.init(dir,
 	{
-		handlers : { /* No loaders specified */ }
+		//handlers : { /* No loaders specified */ }
 	})
 
 	{
@@ -328,18 +328,32 @@ Deno.test("loaders, no loaders", async () =>
 	}
 });
 
-Deno.test("loaders, default loaders (txt, json)", async () =>
+Deno.test("payloads, initial pass (txt, json)", async () =>
 {
 	const dir = path.resolve(DATA_BASE_PATH, "default-loaders", "support")
 
 	const walker = new Walker<JsonPayload|TextPayload>()
 	await walker.init(dir,
 	{
-		handlers :
+		async onFileNodeEnter (node, _, filepath)
 		{
-			"" : { loader : defaultTextLoader },
-			".txt" : { loader : defaultTextLoader },
-			".json" : { loader : defaultJsonLoader },
+			// filepath is provided only on first pass
+			assert(filepath)
+			
+			const content = await Deno.readTextFile(filepath)
+			
+			if (Walker.matches.extension(filepath, ""))
+			{
+				node.payload = processorForText(content)
+			}
+			else if (Walker.matches.glob(filepath, "**/*.txt"))
+			{
+				node.payload = processorForText(content)
+			}
+			else if (Walker.matches.glob(filepath, "**/*.json"))
+			{
+				node.payload = processorForJson(content)
+			}
 		}
 	})
 
@@ -393,7 +407,7 @@ Deno.test("loaders, default loaders (txt, json)", async () =>
 	}
 });
 
-Deno.test("loaders, filter via function", async () =>
+Deno.test("payloads, initial pass, filter via function", async () =>
 {
 	const dir = path.resolve(DATA_BASE_PATH, "filters")
 	const files: string[] = []
@@ -401,13 +415,21 @@ Deno.test("loaders, filter via function", async () =>
 	const walker = new Walker<JsonPayload|TextPayload>()
 	await walker.init(dir,
 	{
-		handlers :
+		async onFileNodeEnter (node, _, filepath)
 		{
-			".txt" : { loader : defaultTextLoader },
+			// filepath is provided only on first pass
+			assert(filepath)
+			
+			const content = await Deno.readTextFile(filepath)
+			
+			if (Walker.matches.glob(filepath, "**/*.txt"))
+			{
+				node.payload = processorForText(content)
+			}
 		}
 	},
 	{
-		filter : (name: string, fullpath: string, kind: NodeKind) =>
+		filter (name: string, fullpath: string, kind: NodeKind)
 		{
 			// Exclude directories
 			if (kind != NodeKind.FILE)
@@ -431,9 +453,35 @@ Deno.test("loaders, filter via function", async () =>
 
 	assertArrayIncludes(files, [ "one.txt", "two.txt" ])
 	assert(files.length == 2)
+	
+	{
+		const readme = walker.pathAsStringToNode("one.txt")
+		
+		// Ensure we have a valid TextPayload
+		assert(readme !== undefined)
+		assert(readme.kind == "FILE")
+		assert(readme.payload !== null)
+		assert(readme.payload.type == "text")
+		
+		// Ensure it has the right content
+		assertEquals(readme.payload.content, '1')
+	}
+	
+	{
+		const readme = walker.pathAsStringToNode("two.txt")
+		
+		// Ensure we have a valid TextPayload
+		assert(readme !== undefined)
+		assert(readme.kind == "FILE")
+		assert(readme.payload !== null)
+		assert(readme.payload.type == "text")
+		
+		// Ensure it has the right content
+		assertEquals(readme.payload.content, '2')
+	}
 });
 
-Deno.test("loaders, filter via glob", async () =>
+Deno.test("payloads, initial pass, filter via glob", async () =>
 {
 	const dir = path.resolve(DATA_BASE_PATH, "filters")
 	const files: string[] = []
@@ -441,13 +489,18 @@ Deno.test("loaders, filter via glob", async () =>
 	const walker = new Walker<JsonPayload|TextPayload>()
 	await walker.init(dir,
 	{
-		handlers :
+		async onFileNodeEnter (node, _, filepath)
 		{
-			".txt" : { loader : defaultTextLoader },
-		},
-		
-		onFileNodeEnter (node)
-		{
+			// filepath is provided only on first pass
+			assert(filepath)
+			
+			const content = await Deno.readTextFile(filepath)
+			
+			if (Walker.matches.glob(filepath, "**/*.txt"))
+			{
+				node.payload = processorForText(content)
+			}
+			
 			files.push(node.name)
 		}
 	},
@@ -457,4 +510,30 @@ Deno.test("loaders, filter via glob", async () =>
 
 	assertArrayIncludes(files, [ "one.txt", "two.txt" ])
 	assert(files.length == 2)
+	
+	{
+		const readme = walker.pathAsStringToNode("one.txt")
+		
+		// Ensure we have a valid TextPayload
+		assert(readme !== undefined)
+		assert(readme.kind == "FILE")
+		assert(readme.payload !== null)
+		assert(readme.payload.type == "text")
+		
+		// Ensure it has the right content
+		assertEquals(readme.payload.content, '1')
+	}
+	
+	{
+		const readme = walker.pathAsStringToNode("two.txt")
+		
+		// Ensure we have a valid TextPayload
+		assert(readme !== undefined)
+		assert(readme.kind == "FILE")
+		assert(readme.payload !== null)
+		assert(readme.payload.type == "text")
+		
+		// Ensure it has the right content
+		assertEquals(readme.payload.content, '2')
+	}
 });

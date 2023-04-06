@@ -12,8 +12,8 @@ export
 
 export
 {
-	defaultTextLoader,
-	defaultJsonLoader,
+	processorForText,
+	processorForJson,
 	
 	type TextPayload,
 	type JsonPayload,
