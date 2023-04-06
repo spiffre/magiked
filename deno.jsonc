@@ -1,4 +1,11 @@
 {
+	"name": "@spiffre/magiked",
+	"tasks":
+	{
+		"tc": "deno check ./mod.ts",
+		"test": "deno test --allow-all",
+		"testw": "deno test --allow-all --watch"
+	},
 	"lint":
 	{
 		"files":
