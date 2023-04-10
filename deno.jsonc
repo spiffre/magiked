@@ -4,7 +4,8 @@
 	{
 		"tc": "deno check ./mod.ts",
 		"test": "deno test --allow-all",
-		"testw": "deno test --allow-all --watch"
+		"testw": "deno test --allow-all --watch",
+		"npm": "deno run -A ./devtools/dnt.ts $(git describe --tags --abbrev=0)"
 	},
 	"lint":
 	{
