@@ -1,7 +1,7 @@
-import * as path from "https://deno.land/std@0.182.0/path/mod.ts"
-import { assert } from "https://deno.land/std@0.182.0/testing/asserts.ts";
+import * as path from "../deps/std/path.ts"
+import { assert } from "../deps/std/assert.ts";
 
-import micromatch from "https://esm.sh/micromatch@4.0.5"
+import { micromatch } from "../deps/micromatch.ts"
 
 
 type ValuesOf<T> = T[keyof T]
