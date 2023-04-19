@@ -84,6 +84,19 @@ await build(
 			url: "git+https://github.com/spiffre/magiked",
 		},
 		
+		files:
+		[
+			"package.json",
+			"types/mod.d.ts",
+			"types/sources/",
+			"esm/mod.js",
+			"esm/sources/",
+			"esm/deps/",
+			"script/mod.js",
+			"script/sources/",
+			"script/deps/",
+		],
+		
 		devDependencies :
 		{
 			"@types/micromatch" : "^4.0.0"
@@ -92,12 +105,7 @@ await build(
 	
 	postBuild ()
 	{
-		// Copy README file
-		//await Deno.copyFileSync("README.md", "npm/README.md");
-			
-		// Ensure the test data is ignored in the `.npmignore` file
-		// so it doesn't get published with your npm package
-		Deno.writeTextFileSync(`${TEMP_DIR}/.npmignore`, "esm/tests/data/\nscript/tests/data/\n", { append: true })
+		
 	}
 })
 
