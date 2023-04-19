@@ -1,1 +1,10 @@
-export * from "https://deno.land/std@0.182.0/fs/eol.ts"
+const readDir = Deno.readDir
+const stat = Deno.stat
+
+export type DirEntry = { name: string }
+
+export const fs =
+{
+	readDir,
+	stat
+}

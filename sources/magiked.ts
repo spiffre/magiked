@@ -1,8 +1,8 @@
-import { path } from "../deps/deno/path.ts"
 import { assert } from "../deps/deno/assert.ts";
+import { fs, type DirEntry } from "../deps/deno/fs.ts";
+import { path } from "../deps/deno/path.ts"
 
 import { micromatch } from "../deps/any/micromatch.ts"
-
 
 type ValuesOf<T> = T[keyof T]
 export type FileExtension = `.${string}` | ''
@@ -137,8 +137,8 @@ export class Walker<T extends Payload>
 		await this.hooks.onDirectoryNodeEnter?.(dirNode, this, dirpath)
 		
 		// Read the directory's content
-		const entries: Deno.DirEntry[] = []
-		for await (const fileOrDirectory of await Deno.readDir(dirpath))
+		const entries: DirEntry[] = []
+		for await (const fileOrDirectory of await fs.readDir(dirpath))
 		{
 			entries.push(fileOrDirectory)
 		}
@@ -146,7 +146,7 @@ export class Walker<T extends Payload>
 		// Sort if needed
 		if (this.options.sort == true)
 		{
-			entries.sort( (a: Deno.DirEntry, b: Deno.DirEntry) =>
+			entries.sort( (a: DirEntry, b: DirEntry) =>
 			{
 				return a.name.localeCompare(b.name)
 			})
@@ -161,7 +161,7 @@ export class Walker<T extends Payload>
 			}
 			
 			const entryFullpath = path.resolve(dirpath, fileOrDirectory.name)
-			const stats = await Deno.stat(entryFullpath)
+			const stats = await fs.stat(entryFullpath)
 			
 			if (stats.isDirectory)
 			{

@@ -1,2 +1,3 @@
 // @ts-ignore Node-specific code
-export const path = require("node:path")
+import path from "node:path"
+export { path }
