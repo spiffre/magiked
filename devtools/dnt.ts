@@ -23,7 +23,7 @@ await build(
 {
 	entryPoints: ["./mod.ts"],
 	outDir: TEMP_DIR,
-	shims: { deno: true },
+	shims: { deno: 'dev' },
 	
 	package:
 	{
