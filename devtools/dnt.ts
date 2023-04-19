@@ -121,6 +121,12 @@ const VERSION = retrieveVersion()
 			version: VERSION,
 			description: "",
 			license: "MIT",
+			
+			engines:
+			{
+				"node": ">=16.20.0",
+			},
+			
 			repository:
 			{
 				type: "git",
