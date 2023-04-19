@@ -1,7 +1,7 @@
-import * as path from "../deps/std/path.ts"
-import { assert } from "../deps/std/assert.ts";
+import { path } from "../deps/deno/path.ts"
+import { assert } from "../deps/deno/assert.ts";
 
-import { micromatch } from "../deps/micromatch.ts"
+import { micromatch } from "../deps/any/micromatch.ts"
 
 
 type ValuesOf<T> = T[keyof T]
