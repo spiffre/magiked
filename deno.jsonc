@@ -5,6 +5,7 @@
 		"tc": "deno check ./mod.ts",
 		"test": "deno test --allow-all ./tests",
 		"testw": "deno test --allow-all --watch ./tests",
+		"publish": "git push --atomic origin main $(git tag --points-at HEAD | false)",
 		"npm": "deno run -A ./devtools/dnt.ts $(git describe --tags --abbrev=0)"
 	},
 	"lint":
