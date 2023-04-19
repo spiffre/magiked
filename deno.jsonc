@@ -3,8 +3,8 @@
 	"tasks":
 	{
 		"tc": "deno check ./mod.ts",
-		"test": "deno test --allow-all",
-		"testw": "deno test --allow-all --watch",
+		"test": "deno test --allow-all ./tests",
+		"testw": "deno test --allow-all --watch ./tests",
 		"npm": "deno run -A ./devtools/dnt.ts $(git describe --tags --abbrev=0)"
 	},
 	"lint":
