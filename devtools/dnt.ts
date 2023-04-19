@@ -1,8 +1,55 @@
+import { assert } from "https://deno.land/std@0.182.0/testing/asserts.ts";
 import { copy } from "https://deno.land/std@0.182.0/fs/mod.ts";
 import { build } from "https://deno.land/x/dnt@0.34.0/mod.ts"
 
 const TEMP_DIR = "npm/temp"
 const NPM_DIR = "npm"
+
+
+async function switchToNodeDependencies ()
+{
+	const process = Deno.run(
+	{
+		cmd : [ "find", "./sources/", "-type", "f", "-name","*.ts", "-exec", "sed", "-i", "", "s/deps\\/deno/deps\\/node/g", "{}", "+" ],
+		stdout : "piped",
+		stderr : "piped",
+	})
+	
+	const status = await process.status()
+	assert(status.success == true, "switchToNodeDependencies() process failed")
+	
+	const stdout = await process.output()
+	assert(new TextDecoder("utf8").decode(stdout) == "", "switchToNodeDependencies() stdout non-empty")
+	
+	const stderr = await process.stderrOutput()
+	assert(new TextDecoder("utf8").decode(stderr) == "", "switchToNodeDependencies() stderr non-empty")
+	
+	process.close()
+}
+
+async function switchToDenoDependencies ()
+{
+	const process = Deno.run(
+	{
+		cmd : [ "find", "./sources/", "-type", "f", "-name","*.ts", "-exec", "sed", "-i", "", "s/deps\\/node/deps\\/deno/g", "{}", "+" ],
+		stdout : "piped",
+		stderr : "piped",
+	})
+	
+	const status = await process.status()
+	assert(status.success == true, "revertToDenoDependencies() process failed")
+	
+	const stdout = await process.output()
+	assert(new TextDecoder("utf8").decode(stdout) == "", "revertToDenoDependencies() stdout non-empty")
+	
+	const stderr = await process.stderrOutput()
+	assert(new TextDecoder("utf8").decode(stderr) == "", "revertToDenoDependencies() stderr non-empty")
+	
+	process.close()
+}
+
+// Switch to node dependencies during the packaging
+await switchToNodeDependencies()
 
 
 // Copy test data
@@ -75,3 +122,6 @@ const process2 = Deno.run(
 })
 new TextDecoder("utf8").decode(await process2.output())
 process2.close()
+
+// Revert the code to what it was, using deno dependencies
+await switchToDenoDependencies()
