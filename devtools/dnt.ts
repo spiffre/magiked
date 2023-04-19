@@ -105,7 +105,8 @@ await build(
 	
 	postBuild ()
 	{
-		
+		// Copy README file
+		Deno.copyFileSync("README.md", `${TEMP_DIR}/README.md`);
 	}
 })
 
