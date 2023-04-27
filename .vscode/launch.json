@@ -13,7 +13,8 @@
 			"runtimeArgs": [
 				"test",
 				"--inspect-brk=127.0.0.1:9231",
-				"--allow-all"
+				"--allow-all",
+				"./tests"
 			],
 			"attachSimplePort": 9231,
 			"outputCapture": "std",
