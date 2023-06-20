@@ -162,4 +162,7 @@ const VERSION = retrieveVersion()
 	await createPackageArchive()
 	await extractPackageArchive()
 	await switchToDenoDependencies()
+	
+	// Final log
+	console.error("\nPublish package to npm by running:\n  cd ./npm/package/ && npm publish\n")
 })()
